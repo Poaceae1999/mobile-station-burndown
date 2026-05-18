@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>移動基地台儲能系統 — 專案追蹤看板</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#F0F2F5;color:#111827;font-size:14px}
+a{color:inherit;text-decoration:none}
+
+/* ── Layout ── */
+.page-header{background:#1F2937;color:#fff;padding:24px 32px 20px}
+.page-header h1{font-size:20px;font-weight:700}
+.page-header p{margin-top:5px;font-size:12px;color:#9CA3AF}
+.sprint-banner{margin:16px 32px 0;background:#EFF6FF;border-left:4px solid #3B82F6;border-radius:6px;padding:10px 16px;font-size:12.5px;color:#1D4ED8}
+.main-pane{padding:0 32px 40px}
+.section-hd{margin:28px 0 10px;padding:12px 20px;background:#fff;border-left:5px solid #3B82F6;border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,.08);display:flex;align-items:baseline;gap:16px}
+.section-hd-name{font-size:16px;font-weight:700;color:#1F2937}
+.section-hd-meta{font-size:12px;color:#6B7280;margin-left:auto}
+
+/* ── Stat row ── */
+.stat-row{display:flex;gap:14px;padding:20px 0 4px;flex-wrap:wrap}
+.stat-card{flex:1;min-width:130px;background:#fff;border-radius:10px;padding:14px 18px;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.stat-card .lbl{font-size:11px;color:#6B7280;text-transform:uppercase;letter-spacing:.5px}
+.stat-card .val{font-size:28px;font-weight:700;margin-top:3px}
+.stat-card.s-done .val{color:#10B981}
+.stat-card.s-doing .val{color:#F59E0B}
+.stat-card.s-todo .val{color:#9CA3AF}
+.stat-card.s-total .val{color:#3B82F6}
+
+/* ── Chart ── */
+.chart-box{background:#fff;border-radius:10px;box-shadow:0 1px 3px rgba(0,0,0,.08);padding:18px 22px;margin:16px 0 20px}
+.chart-box h3{font-size:14px;font-weight:600;color:#374151;margin-bottom:12px}
+.chart-wrap{position:relative;height:220px}
+
+/* ── Epic ── */
+.epic{background:#fff;border-radius:10px;box-shadow:0 1px 3px rgba(0,0,0,.08);margin-bottom:16px;overflow:hidden}
+.epic-hd{display:flex;align-items:center;gap:10px;padding:12px 18px;cursor:pointer;user-select:none;border-bottom:1px solid #F3F4F6}
+.epic-bar{width:4px;height:32px;border-radius:2px;flex-shrink:0}
+.epic-name{font-size:14px;font-weight:700;flex:1}
+.epic-sub{font-size:11px;color:#9CA3AF}
+.epic-prog-wrap{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.epic-prog-track{width:100px;height:5px;background:#E5E7EB;border-radius:3px;overflow:hidden}
+.epic-prog-fill{height:100%;border-radius:3px}
+.epic-count{font-size:11px;color:#6B7280;width:44px;text-align:right}
+.epic-arrow{font-size:14px;color:#9CA3AF;transition:transform .2s;flex-shrink:0}
+.epic.closed .epic-arrow{transform:rotate(-90deg)}
+.epic-body{padding:4px 0 8px}
+.epic.closed .epic-body{display:none}
+
+/* ── Feature Card ── */
+.fc-block{padding:8px 18px 4px 26px}
+.fc-title{display:flex;align-items:center;gap:7px;margin-bottom:5px;font-size:12.5px;font-weight:600;color:#374151}
+.fc-id{font-size:10.5px;font-weight:600;background:#E5E7EB;color:#4B5563;padding:1px 7px;border-radius:4px;font-family:monospace}
+.fc-pct{margin-left:auto;font-size:11px;color:#9CA3AF}
+
+/* ── Task ── */
+.task-list{list-style:none;padding:0 0 4px 12px;border-left:2px solid #F3F4F6}
+.ti{display:flex;align-items:flex-start;gap:8px;padding:4px 10px;border-radius:5px;margin-bottom:2px;line-height:1.5}
+.ti.done{background:#D1FAE5}
+.ti.doing{background:#FEF3C7;font-style:italic}
+.ti.todo{background:#F9FAFB}
+.ti-icon{flex-shrink:0;width:16px;text-align:center;margin-top:1px;font-size:13px}
+.ti.done .ti-icon{color:#059669}
+.ti.doing .ti-icon{color:#D97706}
+.ti.todo .ti-icon{color:#9CA3AF}
+.ti-text{flex:1;font-size:12.5px}
+.ti-tags{display:flex;gap:3px;flex-wrap:wrap;flex-shrink:0;align-self:flex-start;margin-top:2px}
+
+/* ── Badges ── */
+.badge{font-size:10.5px;font-weight:600;padding:1px 6px;border-radius:9px;white-space:nowrap}
+.bp0{background:#FEE2E2;color:#DC2626}
+.bp1{background:#FED7AA;color:#EA580C}
+.bp2{background:#E0E7FF;color:#4F46E5}
+.bspec{background:#EDE9FE;color:#6D28D9}
+.bsrc{background:#F3F4F6;color:#6B7280;font-weight:400}
+.bwarn{background:#FEF3C7;color:#B45309;font-weight:400}
+
+footer{text-align:center;padding:20px;color:#9CA3AF;font-size:11.5px;border-top:1px solid #E5E7EB;margin-top:8px}
+
+/* ── 本次更新 changelog ── */
+.changelog{margin:14px 32px 0;border:1.5px solid #BFDBFE;border-radius:10px;background:#EFF6FF;overflow:hidden}
+.changelog-hd{display:flex;align-items:center;gap:10px;padding:10px 16px;cursor:pointer;user-select:none}
+.changelog-hd-dot{width:8px;height:8px;border-radius:50%;background:#3B82F6;flex-shrink:0;animation:pulse 1.8s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.changelog-title{font-size:13px;font-weight:700;color:#1D4ED8;flex:1}
+.changelog-date{font-size:11.5px;color:#3B82F6;font-weight:600}
+.changelog-commits{display:flex;gap:6px;flex-wrap:wrap}
+.changelog-commit{font-size:10.5px;font-weight:600;background:#DBEAFE;color:#1E40AF;padding:1px 8px;border-radius:9px;font-family:monospace}
+.changelog-arrow{font-size:12px;color:#93C5FD;transition:transform .2s}
+.changelog.closed .changelog-arrow{transform:rotate(-90deg)}
+.changelog-body{padding:2px 16px 12px 34px;border-top:1px solid #BFDBFE}
+.changelog.closed .changelog-body{display:none}
+.changelog-ul{list-style:none;padding:0;margin:0}
+.changelog-ul li{display:flex;align-items:baseline;gap:7px;padding:4px 0;font-size:12.5px;color:#1E3A5F;border-bottom:1px solid #DBEAFE}
+.changelog-ul li:last-child{border-bottom:none}
+.changelog-ul li::before{content:'▸';color:#3B82F6;flex-shrink:0;font-size:10px}
+.changelog-tag{font-size:10px;font-weight:700;padding:1px 6px;border-radius:4px;white-space:nowrap;flex-shrink:0}
+.ct-done{background:#D1FAE5;color:#065F46}
+.ct-upd{background:#FEF3C7;color:#92400E}
+.ct-confirm{background:#E0E7FF;color:#3730A3}
+
+/* ── 後端依賴狀態 badge ── */
+.be-ready   { background:#D1FAE5; color:#065F46; }
+.be-partial { background:#FEF3C7; color:#92400E; }
+.be-missing { background:#FEE2E2; color:#991B1B; }
+.fe-waiting { background:#EFF6FF; color:#1D4ED8; }
+
+/* ── 卡片依賴條 ── */
+.card-deps { display:flex; flex-wrap:wrap; gap:4px; padding:4px 18px 8px 26px; align-items:center }
+.card-deps-lbl { font-size:10px; color:#9CA3AF; margin-right:4px; flex-shrink:0 }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>移動基地台儲能管理系統 — 專案追蹤看板</h1>
+  <p>資料來源：F01–F11, G01–G03, 材電0300-4 符合度分析, REF-權限定義, PROTOCOL-CONTEXT　｜　更新：2026-05-18　｜　含 feat/routing + feat/curve-data + WPF stationManager 原始碼審查修正</p>
+</div>
+
+<div class="sprint-banner">
+  <strong>預備期 04-07 ～ 04-30：</strong>架構設計、雲端 Pipeline、BXSJ Modbus 整合、部署架構。
+  &nbsp;&nbsp;<strong>正式衝刺 05-01 → 05-30（30 天）</strong>
+</div>
+
+<div class="changelog" id="changelog">
+  <div class="changelog-hd" onclick="document.getElementById('changelog').classList.toggle('closed')">
+    <div class="changelog-hd-dot"></div>
+    <div class="changelog-title">本次更新 — 2026-05-18（含 WPF 原始碼審查修正）</div>
+    <div class="changelog-commits">
+      <span class="changelog-commit">feat/routing</span>
+      <span class="changelog-commit">feat/curve-data</span>
+      <span class="changelog-commit">WPF-audit</span>
+    </div>
+    <div class="changelog-arrow">▾</div>
+  </div>
+  <div class="changelog-body">
+    <ul class="changelog-ul">
+      <li><span class="changelog-tag ct-done">Done ↑</span> <strong>G02</strong> 連線狀態雙 icon：TopNavigationBar 已完整實作（原 doing 30%）</li>
+      <li><span class="changelog-tag ct-done">Done ↑</span> <strong>G03</strong> 語言切換：LocalizationManager 雙語完整實作（原 todo）</li>
+      <li><span class="changelog-tag ct-upd">更新 ↑</span> <strong>G03</strong> 登出流程：~55% → ~85%；<strong>G01</strong> 動態載入：~10% → ~75%</li>
+      <li><span class="changelog-tag ct-done">Done ↑</span> <strong>F03</strong> T1-B 告警歷史 UI：AlarmLogPanel 902 行完整實作（原 doing 15%）</li>
+      <li><span class="changelog-tag ct-done">Done ↑</span> <strong>F04</strong> G2 彙總 VM 屬性、G3 溫度/均衡屬性：均已完整實作（原 todo/doing）</li>
+      <li><span class="changelog-tag ct-done">Done ↑</span> <strong>F05</strong> 歷史資料整合：AnalysisDashboardPanel 完整串接（原 doing 40%）</li>
+      <li><span class="changelog-tag ct-done">Done ↑</span> <strong>F09</strong> AddStation submit + auto-refresh：WPF UI 端完整實作（原 todo）</li>
+      <li><span class="changelog-tag ct-upd">更新 ↑</span> <strong>F06</strong> 後端串接：~40% → ~70%；<strong>F10</strong> UserManagement WPF UI 完整（doing）</li>
+      <li><span class="changelog-tag ct-confirm">修正 ↓</span> <strong>G01</strong> 搜尋欄：SearchBar 無 TextChanged，過濾邏輯 0%（重新標 todo）</li>
+      <li><span class="changelog-tag ct-confirm">修正 ↓</span> <strong>F04 G4</strong> 告警閃爍 0%、<strong>F07</strong> 後端取資料 0%、<strong>F08</strong> 排程下發 0%（均改為 todo）</li>
+      <li><span class="changelog-tag ct-confirm">修正 ↓</span> <strong>F11</strong> ~20% → ~5%；<strong>E0</strong> 補登 IStationDataProvider 缺少 5 個方法</li>
+      <li><span class="changelog-tag ct-upd">資料</span> 燃盡圖 05-18：FE done 修正為 24 pts（+7 真實完成）；BE 持平 7 pts</li>
+    </ul>
+  </div>
+</div>
+
+<div id="main-pane" class="main-pane"></div>
+
+<footer id="footer-text"></footer>
+
+<!-- ════════════════════════════════════════════════════════
+     DATA  —  所有項目定義在此，HTML 不含任何硬編數值
+     ════════════════════════════════════════════════════════ -->
+<script>
+/* ─── 常數 ──────────────────────────────────────────────── */
+const SPRINT = { start: '2026-05-01', end: '2026-05-30', days: 30 };
+const TODAY  = '2026-05-18';
+
+/* ─── 燃盡實際數據（[日期, 剩餘pts]） ────────────────────
+   fe = 前端 WPF (E1–E7)；be = 後端 Cloud (E8)
+   剩餘 = 總pts − 累積完成pts（只有 done 算）
+   ────────────────────────────────────────────────────── */
+/* 燃盡實際數據 ─ 剩餘 pts 以 null 開頭表示「由 renderer 自動填入 total」
+   fe 總計由 EPICS layer=fe 動態算出（每次新增 task 自動生效）
+   be 05-01 起始點同理自動填入                                       */
+const BURNDOWN = {
+  fe: [
+    ['2026-05-01', null], // auto = fe total（renderer 動態填入）
+    ['2026-05-03', null], // WPF 基礎 shell 後：fe_total − 4
+    ['2026-05-06', null], // MVVM 重構後：     fe_total − 11
+    ['2026-05-09', null], // 各 Panel 嵌入後：  fe_total − 16（最終 done 數）
+    ['2026-05-12', null], // StationInfoCard；744a7b5 主要是後端，前端不動
+    ['2026-05-18', null], // React demo：routing + curve URL sync + Home 搜尋/region 分組
+  ],
+  // 相對完成量（累積 done pts，renderer 用 total − delta 算剩餘）
+  fe_done_at: [0, 4, 11, 16, 16, 24],
+
+  be: [
+    ['2026-05-01', null], // auto = be total
+    ['2026-05-12', null], // 744a7b5 完成 4 pts
+    ['2026-05-18', null], // 無新後端 commit
+  ],
+  be_done_at: [3, 7, 7],     // 預備期已完成 3；05-12 累積 7；05-18 持平
+};
+
+/* 前後端依賴對照（業務語言，無 API 名稱）
+   status: 'ready' = 後端已就緒可串接
+           'partial' = 後端部分就緒
+           'missing' = 後端尚未實作
+*/
+const FE_BE_DEPS = [
+  // ── 後端已就緒，WPF 尚未串接 ────────────────────────────
+  { id:'station-list',      fe:'站台樹狀清單動態載入',              layer:'G01 · F01',        be:'站台清單與狀態查詢',                     status:'ready',   p:'P0' },
+  { id:'overview-data',     fe:'站台即時電力流向數值（含 3 秒更新）', layer:'F02',               be:'站台運行總覽資料查詢',                   status:'ready',   p:'P1' },
+  { id:'battery-status',    fe:'電池模組 SOC/SOH/電壓/電流即時值',   layer:'F04',               be:'電池模組狀態查詢',                       status:'ready',   p:'P0' },
+  { id:'device-points',     fe:'逆變器各點位數值與故障狀態',          layer:'F03',               be:'設備點位查詢（含 14 項故障位元解析）',    status:'ready',   p:'P1' },
+  { id:'alarm-bits',        fe:'告警閃爍視覺狀態機所需位元定義',      layer:'G02 · F03 · F04',   be:'控制器故障與告警位元對應表（已完整定義）', status:'ready',   p:'P0' },
+  { id:'alarm-records',     fe:'告警紀錄清單（F06）',                layer:'F06',               be:'站台告警記錄查詢（含等級/狀態/時間）',    status:'ready',   p:'P0' },
+  { id:'history-data',      fe:'歷史趨勢曲線資料',                   layer:'F05',               be:'點位歷史資料查詢（時間序列）',             status:'ready',   p:'P2' },
+  { id:'schedule-dispatch', fe:'排程指令下發至設備',                 layer:'F08',               be:'控制指令寫入路徑（部分就緒）',            status:'partial', p:'P0' },
+  // ── 後端尚未實作，前端被阻擋 ──────────────────────────────
+  { id:'op-log',            fe:'操作事件紀錄清單（F07）',             layer:'F07',               be:'操作事件記錄查詢（登入/指令/確認）',      status:'missing', p:'P0' },
+  { id:'schedule-read',     fe:'排程讀回（從設備讀取現有排程）',       layer:'F08',               be:'排程設定讀取服務',                       status:'missing', p:'P1' },
+  { id:'auth',              fe:'登入畫面與四等級密碼驗證',            layer:'G03 · F10 · §6.6',  be:'使用者認證與密碼層級管理',               status:'missing', p:'P0' },
+  { id:'new-station',       fe:'新增站台流程',                        layer:'F09',               be:'站台新增/註冊服務',                      status:'missing', p:'P1' },
+  { id:'sys-settings',      fe:'系統設定讀取與儲存（告警閾值等）',    layer:'F10',               be:'系統設定存取服務',                       status:'missing', p:'P1' },
+  { id:'firmware',          fe:'韌體升級流程與進度追蹤',              layer:'F11',               be:'韌體推送與進度回報服務',                  status:'missing', p:'P2' },
+  { id:'ai-sampling',       fe:'曲線頁 6 秒取樣資料（驗收規格要求）', layer:'F05 · §4.4.4(6)(d)', be:'AI 類比值 6 秒連續取樣儲存（獨立程序）', status:'missing', p:'P1' },
+];
+
+/* 快速查表 */
+const FE_DEP_MAP = Object.fromEntries(FE_BE_DEPS.map(d => [d.id, d]));
+
+/* 後端服務對應等待中的前端功能 */
+const BE_FE_WAITING = [
+  { be:'站台清單查詢（已就緒）',             fe_waiting:['G01 站台樹狀清單動態載入', 'F01 多站台表格載入'] },
+  { be:'站台運行總覽查詢（已就緒）',          fe_waiting:['F02 即時電力流向與數值顯示'] },
+  { be:'電池狀態查詢（已就緒）',              fe_waiting:['F04 電池模組即時數值與 SOC/SOH'] },
+  { be:'設備點位查詢（已就緒）',              fe_waiting:['F03 逆變器各點位狀態', 'G02 告警閃爍觸發'] },
+  { be:'告警記錄查詢（已就緒）',              fe_waiting:['F06 告警紀錄清單（需先修 binding bug）'] },
+  { be:'趨勢資料查詢（已就緒）',              fe_waiting:['F05 歷史趨勢曲線'] },
+  { be:'控制指令寫入（部分就緒）',            fe_waiting:['F08 排程儲存', 'F01 調度備援下發'] },
+  { be:'認證與密碼管理（⚠️ 尚未實作）',       fe_waiting:['G03 登入/登出流程', 'F10 密碼設定', '§6.6 四等級密碼強制執行'] },
+  { be:'操作記錄查詢（⚠️ 尚未實作）',         fe_waiting:['F07 操作紀錄清單'] },
+  { be:'TP↔CP 上報介面（⚠️ 待 CHT 協定文件）',fe_waiting:['所有站台資料向 CHT 行電中心上報'] },
+];
+
+/* ─── EPIC / CARD / TASK 資料 ────────────────────────────
+   layer: 'fe' = 前端WPF，'be' = 後端Cloud
+   task fields:
+     s  : 'done' | 'doing' | 'todo'
+     t  : 文字
+     p  : 'P0' | 'P1' | 'P2' | null
+     sp : ['§6.5', '4.4.4(2)']   spec refs
+     src: ['G01','進度文檔P0']     source tags
+     q  : true = 待確認
+   ────────────────────────────────────────────────────── */
+const EPICS = [
+
+  /* ═══ E1: 站台管理與導覽 ═══════════════════════════════ */
+  { id:'E1', name:'站台管理與導覽', color:'#3B82F6', sub:'G01 · F01', layer:'fe', cards:[
+
+    { id:'G01', name:'側邊欄導覽', pct:40, be_deps:['station-list','alarm-bits'], tasks:[
+      { s:'done', t:'三層 TreeView 可展開／收合（Region → Center → Station）', src:['G01'] },
+      { s:'done', t:'只顯示告警/斷線 CheckBox 篩選；收合側邊欄 ToggleButton（已實作）', src:['G01'] },
+      { s:'todo', p:'P1', t:'搜尋站台／營運中心即時篩選（SearchBar 控制項存在但無 TextChanged 事件，過濾邏輯 0%）', src:['G01'] },
+      { s:'doing', p:'P1', t:'修正導覽樹硬編碼，改為動態載入後台站台清單（查詢服務已就緒，WPF 串接 ~75%）', src:['G01','F01','進度文檔P0'] },
+      { s:'todo',  p:'P1', t:'樹狀節點告警顏色／閃爍標示（有未確認告警 → 顏色或閃爍；離線 → 獨立顏色）', sp:['§6.4.1(3)'], src:['G01','G02','進度文檔P0'] },
+      { s:'todo',  q:true, t:'新增站台後側邊欄自動即時更新（需 GetStations() 連通）', src:['G01'] },
+      { s:'todo',  q:true, t:'離線站台節點具體顏色定義（設計確認後實作）', src:['G01'] },
+    ]},
+
+    { id:'F01', name:'站台選擇總覽', pct:22, be_deps:['station-list'], tasks:[
+      { s:'todo',  p:'P0', t:'將卡片式總覽改為 24 欄多站台表格（含橫向捲動）', src:['F01','進度文檔P0'] },
+      { s:'todo',  p:'P0', t:'實作三欄凍結（站台名稱、災害調度備援、備援放電測試 sticky）', src:['F01'] },
+      { s:'todo',  p:'P0', t:'災害調度備援 / 備援放電測試 勾選、全選與下發（遙控密碼層級）', src:['F01','進度文檔P0'] },
+      { s:'todo',  p:'P0', t:'下發進度追蹤（DispatchPhase: sending → retrying → done）', src:['F01'] },
+      { s:'todo',  p:'P1', t:'數值欄位排序（StopCount、PV 功率、直流功率、用電功率等）', src:['F01','進度文檔P1'] },
+      { s:'todo',  p:'P1', t:'UI 權限控制（調度下發按鈕依密碼等級顯示/隱藏）', src:['F01','REF'] },
+      { s:'doing', p:'P1', t:'IsLoading / HasError 顯示狀態（目前僅 catch 例外，~30%）', src:['F01'] },
+      { s:'todo',  q:true, t:'確認站台離線進入站台頁面的資料顯示策略（最後快照 vs 全空）', src:['F01'] },
+      { s:'done',  t:'搜尋範圍確認：站台名稱 + 所屬區域均可搜尋（React demo 已驗證）', src:['F01'] },
+    ]},
+  ]},
+
+  /* ═══ E2: 即時監控總覽 ══════════════════════════════════ */
+  { id:'E2', name:'即時監控總覽', color:'#8B5CF6', sub:'F02 · G02 · G03', layer:'fe', cards:[
+
+    { id:'F02', name:'站台運行總覽', pct:45, be_deps:['overview-data'], tasks:[
+      { s:'done',  t:'PowerFlowDiagram、BatteryStatusSection、StationInfoCard 嵌入；子 Panel Visibility 切換；3 秒輪詢', src:['F02'] },
+      { s:'doing', p:'P0', t:'調整 2×4 導覽按鈕順序與名稱（設定→模式設定、登出→首頁已確認；排序與圖示對齊中，~55%）', src:['F02','進度文檔P0'] },
+      { s:'todo',  p:'P0', t:'將 MainWindow 連線狀態紅色橫幅移至 G02 告警訊息區', src:['F02','G02','進度文檔P0'] },
+      { s:'todo',  p:'P1', t:'右鍵 Context Menu：Hover 問號游標、數值型（3項）/ 狀態型（2項）選單', src:['F02','進度文檔P1'] },
+      { s:'todo',  p:'P1', t:'Context Menu → 歷史曲線跳轉（NavigateToCurveData，帶點位參數至 F05）', src:['F02'] },
+      { s:'todo',  p:'P1', t:'Context Menu → 參數設定 Modal（SaveParam / CancelParam；成功確認 Modal；失敗警示）', src:['F02'] },
+      { s:'todo',  p:'P1', t:'Context Menu → 訊息歷史跳轉（NavigateToMessages，帶篩選參數至 F06）', src:['F02'] },
+      { s:'todo',  p:'P2', t:'PowerFlowDiagram 縮放功能（＋/－ 按鈕或 MouseWheel ScaleTransform）', src:['F02','進度文檔P2'] },
+      { s:'todo',  q:true, t:'確認可互動元素完整清單（哪些節點/數值支援右鍵）及 API 端點名稱', src:['F02'] },
+    ]},
+
+    { id:'G02', name:'即時告警顯示', pct:22, be_deps:['alarm-bits'], tasks:[
+      { s:'todo',  p:'P0', t:'將紅色橫幅移出系統畫面區，實作為獨立常駐告警訊息區元件（視窗右上方固定位置）', sp:['§6.4.1(1)'], src:['G02','進度文檔P0'] },
+      { s:'done',  t:'連線狀態改用成功/失敗雙 icon + 顏色切換（取代純色橫幅，TopNavigationBar 已實作）', src:['G02'] },
+      { s:'todo',  p:'P0', t:'四等級告警視覺狀態機：緊急（紅閃）/ 一般（粉紅閃）→ 確認後固定色 → 恢復後原色', sp:['§6.5'], src:['G02','進度文檔P0'] },
+      { s:'todo',  p:'P0', t:'告警保持：告警消失但未確認前持續閃爍，確認後停閃恢復原色', sp:['§6.5.1(4)'], src:['G02'] },
+      { s:'todo',  p:'P1', t:'緊急告警自動跳頁至告警所在頁面並標紅對應點位', sp:['§6.5.1(1)'], src:['G02','進度文檔P1'] },
+      { s:'todo',  p:'P1', t:'F01 故障告警欄位加入閃爍 → 確認 → 固定紅行為', src:['G02','F01','進度文檔P1'] },
+      { s:'todo',  p:'P1', t:'聲音告警：緊急持續聲響 / 一般一次聲響 / 狀態改變短暫聲響', sp:['§6.5'], src:['G02','進度文檔P0'] },
+      { s:'todo',  q:true, t:'確認告警訊息區顯示筆數（最新一筆 or 輪播）及點擊導覽目的地（F06 vs 告警站台頁）', src:['G02'] },
+      { s:'todo',  q:true, t:'確認聲音告警平台實作方式（Windows 系統聲 vs App 內嵌音效）', src:['G02'] },
+    ]},
+
+    { id:'G03', name:'頂部列', pct:72, be_deps:['auth'], tasks:[
+      { s:'done',  t:'系統即時時鐘每秒更新（CurrentClockText 已實作）', src:['G03'] },
+      { s:'done',  t:'返回運行總覽按鈕（按鈕存在）', src:['G03'] },
+      { s:'doing', t:'登出流程（onClick 已實作、導覽目標確認回首頁；需對接後台 session 失效，~85%）', src:['G03'] },
+      { s:'done',  t:'語言切換中/EN（LocalizationManager 完整雙語實作，ResourceDictionary 已串接，持久化儲存）', src:['G03'] },
+      { s:'todo',  p:'P2', t:'深色模式切換（UI 佔位已有，邏輯未串）', src:['G03'] },
+      { s:'todo',  q:true, t:'確認語言切換是否必要、系統時鐘顯示本機 or 伺服器時間（登出→首頁已確認）', src:['G03'] },
+      { s:'todo',  q:true, t:'確認頂部列是否顯示目前登入使用者名稱與密碼等級', src:['G03'] },
+    ]},
+  ]},
+
+  /* ═══ E3: 設備狀態監控 ══════════════════════════════════ */
+  { id:'E3', name:'設備狀態監控', color:'#10B981', sub:'F03 · F04', layer:'fe', cards:[
+
+    { id:'F03', name:'混合型逆變器狀態', pct:55, be_deps:['device-points','alarm-bits'], tasks:[
+      { s:'done',  t:'InverterDashboard 5 個狀態分組（StatusGroups）、PowerFlowDiagram、StatusBar、左側導覽按鈕框架', src:['F03'] },
+      { s:'done',  t:'告警分類按鈕 5 個（交流輸入/太陽能輸入/交流輸出/電池/其他）已渲染', src:['F03'] },
+      { s:'todo',  p:'P0', q:true, t:'確認告警歷史儲存機制（架構決策：SQLite 本地偵測暫存器變化 vs 硬體 push）', src:['F03'] },
+      { s:'done',  t:'T1-B 告警歷史 UI（AlarmLogPanel 完整實作：分類選擇 + 進階篩選 + 列表顯示，902 行）', src:['F03'] },
+      { s:'todo',  p:'P1', t:'兩級告警閃爍：緊急紅閃/一般粉紅閃；確認後固定色；恢復後還原；未確認持續閃；緊急自動跳頁', sp:['§6.4.3'], src:['F03'] },
+      { s:'doing', p:'P1', t:'PrintCommand（呼叫系統列印對話框；失敗 Modal；離線 PDF 備選，按鈕已渲染，~10%）', src:['F03','進度文檔P1'] },
+      { s:'doing', p:'P1', t:'SaveImageCommand（SaveFileDialog + PNG 輸出；失敗 Modal，按鈕已渲染，~10%）', src:['F03','進度文檔P1'] },
+      { s:'todo',  p:'P1', t:'無資料 / 載入失敗狀態處理（IsLoading / HasError UI）', src:['F03'] },
+    ]},
+
+    { id:'F04', name:'電池狀態', pct:62, be_deps:['battery-status','alarm-bits'], tasks:[
+      { s:'done',  t:'3 個模組 Overview Card、Tab 切換、SOC/SOH 環形圖、電壓/電流欄位、16 芯電壓長條圖', src:['F04'] },
+      { s:'done',  t:'IStationDataProvider 已連接；SOC/SOH < 50% 自動變紅（G1 模組數量固定 3 個已確認）', src:['F04','協議'] },
+      { s:'done',  t:'G2：整體彙總 VM 屬性完整（站級 SOC/SOH/電壓/電流/功率/BackupChargeLimit/BackupDischargeLimit）', src:['F04'] },
+      { s:'done',  t:'G3：模組詳細 5 欄位 VM 屬性完整（溫度/均衡欄位已實作）', src:['F04'] },
+      { s:'todo',  p:'P0', t:'G5：載入失敗改顯示警告 Modal（移除靜默 catch + mock 數據保留）', src:['F04','進度文檔P0'] },
+      { s:'todo',  p:'P1', t:'G4：兩級告警閃爍（緊急紅閃/一般粉紅閃；確認→固定色；恢復→原色；保持閃爍；緊急跳頁）', sp:['§6.4.3'], src:['F04'] },
+      { s:'todo',  p:'P1', t:'G6：右鍵選單（OpenAlarmHistoryCommand / OpenCurveCommand / OpenParameterSettingCommand）', src:['F04','進度文檔P2'] },
+      { s:'doing', p:'P2', t:'G7：SaveImageCommand / PrintCommand（按鈕已渲染，邏輯未串，~10%）', src:['F04'] },
+      { s:'todo',  p:'P2', t:'G8：將 code-behind UI 操作改為純 MVVM Binding（UpdateModuleStatus 重構）', src:['F04','進度文檔P2'] },
+      { s:'todo',  q:true, t:'確認詳細資料「溫度/均衡」欄位協議暫存器位址（硬體廠商確認）', src:['F04'] },
+      { s:'todo',  q:true, t:'確認設定告警條件暫存器位址（FC06 vs FC16，鋰鐵 vs 鈉鹽差異）', src:['F04'] },
+    ]},
+  ]},
+
+  /* ═══ E4: 資料分析 ══════════════════════════════════════ */
+  { id:'E4', name:'資料分析', color:'#F59E0B', sub:'F05（標 F11）曲線資料', layer:'fe', cards:[
+
+    { id:'F05', name:'曲線資料（標 F11）', pct:75, be_deps:['history-data','ai-sampling'], tasks:[
+      { s:'done',  t:'WPF Path 折線圖繪製（BuildCurveGeometry 已實作，滑鼠 Hover 有，~80%）', src:['F05'] },
+      { s:'done',  t:'指標 Chip 切換、時間區間選擇器 UI 框架；URL 狀態同步（category/timeframe/view/targets/metric）已在 React demo 完成', src:['F05'] },
+      { s:'done',  t:'從後台取得指定點位歷史趨勢資料（AnalysisDashboardPanel 完整實作，WPF 已串接真實資料）', src:['F05'] },
+      { s:'todo',  q:true, t:'多條線疊加對比功能（確認需求後實作）', src:['F05'] },
+      { s:'todo',  q:true, t:'匯出功能（CSV / 圖片 ExportCommand，確認需求後實作）', src:['F05'] },
+    ]},
+  ]},
+
+  /* ═══ E5: 告警與操作紀錄 ════════════════════════════════ */
+  { id:'E5', name:'告警與操作紀錄', color:'#EF4444', sub:'F06 · F07', layer:'fe', cards:[
+
+    { id:'F06', name:'告警紀錄', pct:55, be_deps:['alarm-records'], tasks:[
+      { s:'done',  t:'AlarmLogWindow UI 框架（CountTabItemViewModel、mock 資料、篩選 Tab 已有）', src:['F06'] },
+      { s:'todo',  p:'P0', t:'修復 AlarmLogEntryViewModel auto-property binding bug（OnPropertyChanged 未呼叫，UI 不更新）', src:['F06','進度文檔P0'] },
+      { s:'doing', p:'P0', t:'從後台取得站台告警記錄（查詢服務已就緒，WPF 串接進度 ~70%）', src:['F06'] },
+      { s:'todo',  t:'實作確認告警動作（AcknowledgeCommand，需操作密碼層級）', sp:['§6.5'], src:['F06','REF'] },
+      { s:'todo',  t:'告警記錄必要欄位：機房名/群名/I/O名/狀態/等級/發生時間/確認時間/恢復時間/持續時間', sp:['§6.5.2'], src:['F06'] },
+      { s:'todo',  q:true, t:'告警篩選維度定義（時間範圍/等級/分區/狀態 active/resolved/acknowledged）', src:['F06'] },
+      { s:'todo',  q:true, t:'確認告警匯出功能需求（ExportCommand，格式 CSV or Excel）', src:['F06'] },
+    ]},
+
+    { id:'F07', name:'操作紀錄', pct:22, be_deps:['op-log'], tasks:[
+      { s:'done',  t:'OperationLogWindow UI 框架（mock 資料已呈現）', src:['F07'] },
+      { s:'todo',  p:'P0', t:'修復 OperationLogEntryViewModel auto-property binding bug（OnPropertyChanged 未呼叫）', src:['F07','進度文檔P0'] },
+      { s:'todo',  t:'從後台取得操作事件記錄（後台查詢服務尚未實作，SaveCommand 無後端呼叫，0%）', src:['F07'] },
+      { s:'todo',  t:'五類操作事件記錄完整實作（登入/登出、控制命令、告警確認/處理、系統自動控制、狀態改變）', sp:['§6.4.4(1)'], src:['F07'] },
+      { s:'todo',  q:true, t:'篩選維度定義（時間範圍/操作者/類型）及匯出需求確認', src:['F07'] },
+    ]},
+  ]},
+
+  /* ═══ E6: 系統控制與設定 ════════════════════════════════ */
+  { id:'E6', name:'系統控制與設定', color:'#6B7280', sub:'F08 · F09 · F10 · F11（升級韌體）', layer:'fe', cards:[
+
+    { id:'F08', name:'排程設定', pct:20, be_deps:['schedule-dispatch','schedule-read'], tasks:[
+      { s:'done',  t:'ScheduleWindow 週排程表格 UI（ObservableCollection Rows、mock 資料、HHMM 暫存器映射）', src:['F08'] },
+      { s:'todo',  p:'P0', t:'排程指令下發至設備（Save button 無 Click handler，下發邏輯尚未實作，0%）', src:['F08'] },
+      { s:'todo',  t:'排程讀回（從設備讀取現有排程設定，後台服務尚未實作）', src:['F08'] },
+      { s:'todo',  q:true, t:'排程衝突處理邏輯', src:['F08'] },
+      { s:'todo',  q:true, t:'確認排程操作對象（模式/功率限制/時段）、時間粒度（小時 vs 分鐘）、單台 or 多台套用', src:['F08'] },
+    ]},
+
+    { id:'F09', name:'新增站台', pct:50, be_deps:['new-station'], tasks:[
+      { s:'done',  t:'AddStationWindow UI 已建立（~70%）', src:['F09'] },
+      { s:'todo',  q:true, t:'連線驗證步驟（ValidateCommand：Ping / Modbus 測試連線）', src:['F09'] },
+      { s:'done',  t:'送出新增請求（AddStation WPF submit 已實作含 auto-refresh；後台新增服務尚未實作，UI 端完成）', src:['F09'] },
+      { s:'todo',  q:true, t:'確認必填欄位、執行權限（管理員？）、新增流程（dialog vs 獨立頁面）、批次匯入 CSV 需求', src:['F09'] },
+    ]},
+
+    { id:'F10', name:'系統設定', pct:40, be_deps:['sys-settings','auth'], tasks:[
+      { s:'doing', t:'SettingWindow 含 AlarmThresholds ObservableCollection（資料結構有，~60%）', src:['F10'] },
+      { s:'todo',  p:'P1', t:'釐清 F02/F10 邊界，拆分 SettingWindow 職責（站台資訊 vs 系統設定分離）', src:['F10','進度文檔P1'] },
+      { s:'doing', t:'密碼帳號管理（UserManagementWindow WPF UI 完整，後台認證服務尚未實作，UI ~60%）', sp:['§6.6'], src:['F10'] },
+      { s:'todo',  t:'設定版本控管/還原機制（IsDirty + ResetCommand）', src:['F10'] },
+      { s:'todo',  q:true, t:'確認設定類別（連線/告警閾值/帳號/通知）、告警閾值是全域 or 每站台獨立', src:['F10'] },
+    ]},
+
+    { id:'F11', name:'升級韌體（標 F05）', pct:5, be_deps:['firmware'], tasks:[
+      { s:'doing', q:true, t:'需求討論（誰可執行、檔案來源、是否停機、失敗處理、批次支援、進度呈現，~5%）', src:['F11'] },
+      { s:'todo',  p:'P2', t:'韌體升級 UI 設計與實作（dialog vs 獨立頁面；進度條 Progress / Log 顯示）', src:['F11','進度文檔P2'] },
+      { s:'todo',  p:'P2', t:'韌體升級邏輯（進度追蹤 ViewModel + 串接後台推送服務，後台服務尚未實作）', src:['F11'] },
+      { s:'todo',  q:true, t:'確認最低密碼等級（遙控 or 管理），更新 REF-權限定義', src:['F11','REF'] },
+    ]},
+  ]},
+
+  /* ═══ E7: 規格符合度（材電0300-4 未被 FC 覆蓋條款） ══════ */
+  { id:'E7', name:'規格符合度', color:'#7C3AED', sub:'材電0300-4 未被 Feature Card 覆蓋的條款', layer:'fe', cards:[
+
+    { id:'SPEC', name:'材電0300-4 條款', pct:10, be_deps:['auth'], tasks:[
+      { s:'done',  t:'§6.2 資料庫 ANSI SQL / ODBC 符合（PostgreSQL）', sp:['§6.2'], src:['符合度分析'] },
+      { s:'doing', t:'§6.1.2(1) 動態實像圖動畫效果（PowerFlowDiagram StoryBoard 已有，但未與即時數值連動，~20%）', sp:['§6.1.2(1)'], src:['進度文檔P2'] },
+      { s:'todo',  p:'P2', t:'§6.1.2(2) 匯流排顏色變化（電力線路顏色依供電/停電狀態動態切換，目前靜態）', sp:['§6.1.2(2)'], src:['進度文檔P2'] },
+      { s:'todo',  t:'§6.4 六區人機介面完整對齊（告警/操作/畫面選擇/系統畫面/功能選擇/時間 六區確認符合）', sp:['§6.4'], src:['符合度分析'] },
+      { s:'todo',  p:'P0', t:'§6.6 密碼四等級在程式碼中強制執行（查詢/操作/遙控/管理；目前文件定義但程式無強制）', sp:['§6.6'], src:['符合度分析','進度文檔P1'] },
+      { s:'todo',  p:'P1', t:'§6.6.2 連續 3 次錯誤密碼閉鎖 5 分鐘（閉鎖期間 CP 可無條件解除）', sp:['§6.6.2'], src:['進度文檔P1'] },
+      { s:'todo',  q:true, t:'§6.7.1 時間程式 ≥1024 組（遙控 ON/OFF / 蜂鳴器 / 自動記錄）— 週排程非通用時序引擎，確認是否需要', sp:['§6.7.1'], src:['符合度分析'] },
+      { s:'todo',  p:'P2', q:true, t:'§6.7.2 事件處理程式（IEC-61131 / IF-THEN-ELSE；≥256 組）— 確認是否在本次合約範圍', sp:['§6.7.2'], src:['進度文檔P2'] },
+      { s:'todo',  t:'§6.7.3 契約容量處理控制程式（15 分鐘週期需量控制、最大需量記錄與復歸）', sp:['§6.7.3'], src:['符合度分析'] },
+      { s:'todo',  p:'P1', t:'§6.8 遙控連鎖條件確認 + 現場可聞告警信號 + 遙控後狀態同步顯示（FC16 骨架已有，三項未完）', sp:['§6.8'], src:['符合度分析'] },
+      { s:'todo',  p:'P1', t:'§6.9 + 4.4.4(8) 報表系統完全缺失（定時/查詢/立即告警/日/月報；定時印出日報表及曲線圖）', sp:['§6.9','4.4.4(8)'], src:['符合度分析'] },
+    ]},
+  ]},
+
+  /* ═══ E0: 雲端後端基礎 ══════════════════════════════════ */
+  { id:'E0', name:'雲端後端基礎', color:'#0EA5E9', sub:'Cloud pipeline · API · Protocol · 認證', layer:'be', cards:[
+
+    { id:'CLOUD', name:'後端 API 與協議連結', pct:55, tasks:[
+      { s:'done',  t:'各設備量測點位完整定義（控制器狀態位、故障告警位元、模組與電芯資料、排程閾值，附中文說明）', src:['協議','commit 744a7b5'] },
+      { s:'done',  t:'站台告警記錄查詢服務（F06 WPF 可直接串接）', fe_wt:['F06 告警紀錄清單'], src:['協議','commit 744a7b5'] },
+      { s:'done',  t:'點位歷史趨勢資料查詢服務（F05 WPF 可直接串接）', fe_wt:['F05 曲線資料頁'], src:['協議','commit 744a7b5'] },
+      { s:'done',  t:'排程時間窗格式驗證邏輯（供前端排程設定使用）', src:['協議','commit 744a7b5'] },
+      { s:'done',  t:'控制器故障與告警位元對應表（14 項故障 + 4 項告警，WPF 告警閃爍邏輯可直接使用）', fe_wt:['G02 告警閃爍狀態機','F03 逆變器告警'], src:['協議','F03'] },
+      { s:'done',  t:'控制指令下發路徑（指令格式定義、暫存器寫入、回讀骨架）', fe_wt:['F08 排程下發','F01 調度備援下發'], sp:['§6.8'], src:['符合度分析'] },
+      { s:'done',  t:'關聯式資料庫（SQL 相容）+ 服務異常自動重啟機制', sp:['§6.2','4.4.3(1)'], src:['符合度分析'] },
+      { s:'doing', p:'P0', t:'使用者認證與授權機制（SessionContext + AuthStorageService 已有骨架 ~60%；密碼等級控制尚待完整；展示前必須解決）', fe_wt:['G03 登入/登出','F10 密碼設定','§6.6 四等級密碼執行'], sp:['§6.6','4.4.4(14)'], src:['符合度分析'] },
+      { s:'todo',  p:'P0', t:'IStationDataProvider 缺少 5 個方法（GetOperationLogs、WriteSchedule、AcknowledgeAlarm、SendCommand、UpgradeFirmware）— 阻擋 F07/F08/F11 後續整合', src:['E0審查'] },
+      { s:'todo',  p:'P0', q:true, t:'與 CHT 行電中心的資料上報及命令接收介面（協定文件待 CHT 提供，最高優先外部依賴）', fe_wt:['所有站台向 CHT 上報'], sp:['4.4.4(2)'], src:['符合度分析'] },
+      { s:'todo',  p:'P1', t:'確認測量命令 5 秒響應符合規格，並壓測 1,400 台並行承載上限', sp:['4.4.4(6)(c)'], src:['符合度分析'] },
+      { s:'todo',  t:'過期控制指令清理排程（防止指令堆積影響資料庫效能）', src:['符合度分析'] },
+      { s:'todo',  p:'P2', t:'停電告警級聯抑制規則（停電時自動抑制衍生誤報，資料欄位已有，缺觸發邏輯）', sp:['4.4.4(10)'], src:['符合度分析'] },
+      { s:'todo',  t:'伺服器資源健康監控與預警（CPU/RAM/磁碟使用率，含完整運行日誌）', sp:['4.4.3(3)(4)'], src:['符合度分析'] },
+      { s:'todo',  t:'確認各節點時間校準設定（防止告警/紀錄時間偏差）', sp:['4.4.4(3)'], src:['符合度分析'] },
+    ]},
+  ]},
+];
+
+/* ════════════════════════════════════════════════════════
+   RENDERER  —  從 EPICS + BURNDOWN 動態生成所有 HTML
+   ════════════════════════════════════════════════════════ */
+
+/* ── 工具 ── */
+function countTasks(epics) {
+  let done=0, doing=0, todo=0;
+  epics.forEach(e => e.cards.forEach(c => c.tasks.forEach(t => {
+    if(t.s==='done') done++; else if(t.s==='doing') doing++; else todo++;
+  })));
+  return { done, doing, todo, total: done+doing+todo };
+}
+
+const STATUS_ICON = { done:'✓', doing:'◐', todo:'○' };
+
+function taskHTML(t) {
+  const tags = [];
+  if(t.p)                      tags.push(`<span class="badge bp${t.p[1]}">${t.p}</span>`);
+  if(t.sp) t.sp.forEach(s   => tags.push(`<span class="badge bspec">${s}</span>`));
+  if(t.q)                      tags.push(`<span class="badge bwarn">待確認</span>`);
+  if(t.fe_wt) t.fe_wt.forEach(f => tags.push(`<span class="badge fe-waiting">FE: ${f}</span>`));
+  if(t.src) t.src.forEach(s  => tags.push(`<span class="badge bsrc">[${s}]</span>`));
+  return `<li class="ti ${t.s}">
+    <span class="ti-icon">${STATUS_ICON[t.s]}</span>
+    <span class="ti-text">${t.t}</span>
+    ${tags.length ? `<div class="ti-tags">${tags.join('')}</div>` : ''}
+  </li>`;
+}
+
+function epicHTML(e) {
+  const st = countTasks([e]);
+  const pct = st.total ? Math.round(st.done / st.total * 100) : 0;
+  const cardsHTML = e.cards.map(c => {
+    const rows = c.tasks.map(taskHTML).join('');
+    const depsRow = c.be_deps ? (() => {
+      const badges = c.be_deps.map(id => {
+        const d = FE_DEP_MAP[id]; if(!d) return '';
+        const cls = d.status==='ready' ? 'be-ready' : d.status==='partial' ? 'be-partial' : 'be-missing';
+        const lbl = d.status==='ready' ? `✓ ${d.be}` : d.status==='partial' ? `⚡ ${d.be}` : `✗ ${d.be}`;
+        return `<span class="badge ${cls}">${lbl}</span>`;
+      }).join('');
+      return `<div class="card-deps"><span class="card-deps-lbl">後端依賴</span>${badges}</div>`;
+    })() : '';
+    return `<div class="fc-block">
+      <div class="fc-title">
+        <span class="fc-id">${c.id}</span>
+        ${c.name}
+        <span class="fc-pct">${c.pct}%</span>
+      </div>
+      ${depsRow}
+      <ul class="task-list">${rows}</ul>
+    </div>`;
+  }).join('');
+  return `<div class="epic" id="${e.id}">
+    <div class="epic-hd" onclick="toggleEpic('${e.id}')">
+      <div class="epic-bar" style="background:${e.color}"></div>
+      <div class="epic-name">${e.id} — ${e.name}</div>
+      <div class="epic-sub">${e.sub}</div>
+      <div class="epic-prog-wrap">
+        <div class="epic-prog-track">
+          <div class="epic-prog-fill" style="background:${e.color};width:${pct}%"></div>
+        </div>
+        <div class="epic-count">${st.done} / ${st.total}</div>
+      </div>
+      <div class="epic-arrow">▾</div>
+    </div>
+    <div class="epic-body">${cardsHTML}</div>
+  </div>`;
+}
+
+function statsHTML(st, cls='') {
+  return `<div class="stat-row">
+    <div class="stat-card s-done ${cls}"><div class="lbl">Done ✓</div><div class="val">${st.done}</div></div>
+    <div class="stat-card s-doing ${cls}"><div class="lbl">In Progress ◐</div><div class="val">${st.doing}</div></div>
+    <div class="stat-card s-todo ${cls}"><div class="lbl">To Do ○</div><div class="val">${st.todo}</div></div>
+    <div class="stat-card s-total ${cls}"><div class="lbl">Total Story Points</div><div class="val">${st.total}</div></div>
+  </div>`;
+}
+
+function chartHTML(canvasId, title) {
+  return `<div class="chart-box">
+    <h3>${title}</h3>
+    <div class="chart-wrap"><canvas id="${canvasId}"></canvas></div>
+  </div>`;
+}
+
+/* ── 依賴總覽（插入前端分頁頂部） ── */
+function depSummaryHTML() {
+  const readyRows = FE_BE_DEPS.filter(d => d.status !== 'missing');
+  const missingRows = FE_BE_DEPS.filter(d => d.status === 'missing');
+  const statusLabel = { ready:'後端已就緒', partial:'後端部分就緒', missing:'後端缺口' };
+  const rows = (items) => items.map(d => `
+    <tr>
+      <td><div class="dep-fe">${d.fe}</div><div class="dep-layer">${d.layer}</div></td>
+      <td class="dep-be">${d.be}</td>
+      <td class="dep-status"><span class="badge b${d.p.toLowerCase()}">${d.p}</span></td>
+      <td><span class="badge ${d.status==='ready'?'be-ready':d.status==='partial'?'be-partial':'be-missing'}">${statusLabel[d.status]}</span></td>
+    </tr>`).join('');
+  return `<div class="dep-section">
+    <h3>前後端依賴對照</h3>
+    <table class="dep-table">
+      <thead><tr><th>前端功能</th><th>所需後端能力</th><th>優先</th><th>後端狀態</th></tr></thead>
+      <tbody>${rows(readyRows)}${rows(missingRows)}</tbody>
+    </table>
+  </div>`;
+}
+
+/* ── 後端等待項目（插入後端分頁頂部） ── */
+function beWaitingHTML() {
+  const rows = BE_FE_WAITING.map(d => `
+    <tr>
+      <td class="dep-be">${d.be}</td>
+      <td>${d.fe_waiting.map(f=>`<div class="dep-fe">${f}</div>`).join('')}</td>
+    </tr>`).join('');
+  return `<div class="dep-section">
+    <h3>各後端服務對應的前端等待項目</h3>
+    <table class="dep-table">
+      <thead><tr><th>後端服務</th><th>等待中的前端功能</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+  </div>`;
+}
+
+/* ── 區塊標題 ── */
+function sectionHdHTML(label, color, st) {
+  const pct = st.total ? Math.round(st.done/st.total*100) : 0;
+  return `<div class="section-hd" style="border-left-color:${color}">
+    <div class="section-hd-name">${label}</div>
+    <div class="section-hd-meta">${st.done} done · ${st.doing} in progress · ${st.todo} todo — ${pct}%</div>
+  </div>`;
+}
+
+/* ── 前後端合計燃盡數據合併 ── */
+function mergedBurndown() {
+  const feDoneMap = Object.fromEntries(BURNDOWN.fe.map((r,i) => [r[0], BURNDOWN.fe_done_at[i]]));
+  const beDoneMap = Object.fromEntries(BURNDOWN.be.map((r,i) => [r[0], BURNDOWN.be_done_at[i]]));
+  const allDates = [...new Set([...Object.keys(feDoneMap), ...Object.keys(beDoneMap)])].sort();
+  let lastFe = 0, lastBe = 0;
+  const dates = [], done_at = [];
+  allDates.forEach(date => {
+    if(feDoneMap[date] !== undefined) lastFe = feDoneMap[date];
+    if(beDoneMap[date] !== undefined) lastBe = beDoneMap[date];
+    dates.push(date); done_at.push(lastFe + lastBe);
+  });
+  return { dates, done_at };
+}
+
+/* ── 統合渲染（單頁：E0 後端在前，E1–E7 前端在後） ── */
+function renderAll() {
+  const sorted = [...EPICS.filter(e=>e.layer==='be'), ...EPICS.filter(e=>e.layer==='fe')];
+  document.getElementById('main-pane').innerHTML =
+    statsHTML(countTasks(EPICS)) +
+    chartHTML('chart-all', '燃盡圖 — 前後端合計（Sprint 05-01 → 05-30）') +
+    sorted.map(epicHTML).join('');
+}
+renderAll();
+
+/* ── 頁尾總覽 ── */
+const ALL = countTasks(EPICS);
+document.getElementById('footer-text').textContent =
+  `移動基地台儲能管理系統 — 燃盡看板　｜　${TODAY}　｜　`+
+  `總 Story Points: ${ALL.total}　Done: ${ALL.done}　In Progress: ${ALL.doing}　To Do: ${ALL.todo}`;
+
+/* ── Epic 展開/收合 ── */
+function toggleEpic(id) {
+  const el = document.getElementById(id);
+  el.classList.toggle('closed');
+}
+
+/* ════════════════════════════════════════════════════════
+   CHARTS  —  燃盡圖邏輯，從 BURNDOWN + 計算出 total 自動繪製
+   ════════════════════════════════════════════════════════ */
+/* initBurndown
+   dates    : ['2026-05-01', ...]  有資料的日期列表
+   doneList : [0, 4, 11, ...]      各日期累積完成 pts（對齊 dates）
+   total    : 由 EPICS 動態計算
+*/
+function initBurndown(canvasId, layer, dates, doneList, totalOverride) {
+  const total = totalOverride !== undefined ? totalOverride : countTasks(EPICS.filter(e => e.layer === layer)).total;
+
+  const labels = [], idealPts = [];
+  for (let d = 1; d <= 30; d++) {
+    labels.push(`05-${String(d).padStart(2,'0')}`);
+    idealPts.push( +(total * (1 - (d-1)/29)).toFixed(1) );
+  }
+
+  // 建立日期→剩餘 pts 的映射
+  const remainMap = {};
+  dates.forEach((date, i) => {
+    const day = parseInt(date.split('-')[2]);
+    remainMap[day] = total - doneList[i];
+  });
+
+  const actualPts = labels.map((_, i) => remainMap[i+1] ?? null);
+
+  new Chart(document.getElementById(canvasId).getContext('2d'), {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        { label:'理想燃盡線', data:idealPts, borderColor:'#D1D5DB',
+          borderDash:[6,4], borderWidth:2, pointRadius:0, tension:0.1, fill:false },
+        { label:'實際剩餘', data:actualPts, borderColor:'#3B82F6',
+          borderWidth:2.5, pointRadius:4, pointBackgroundColor:'#3B82F6',
+          tension:0.1, fill:false, spanGaps:false },
+      ]
+    },
+    options: {
+      responsive:true, maintainAspectRatio:false,
+      interaction:{ mode:'index', intersect:false },
+      plugins:{
+        legend:{ position:'top', labels:{ font:{size:12}, usePointStyle:true } },
+        tooltip:{ callbacks:{ label: c => c.raw !== null
+          ? c.dataset.label + ': ' + c.raw + ' pts' : '（尚無資料）' }}
+      },
+      scales:{
+        x:{ ticks:{ font:{size:11}, callback:(_,i) => i%3===0 ? labels[i] : '' },
+            grid:{ color:'#F3F4F6' } },
+        y:{ min:0, max:total+5,
+            title:{ display:true, text:'剩餘 pts', font:{size:11} },
+            grid:{ color:'#F3F4F6' } }
+      }
+    }
+  });
+}
+
+// 前後端合計燃盡圖（單一圖表）
+const merged = mergedBurndown();
+initBurndown('chart-all', null, merged.dates, merged.done_at, countTasks(EPICS).total);
+</script>
+</body>
+</html>
