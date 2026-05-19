@@ -263,7 +263,7 @@ const EPICS = [
       { s:'todo',  q:true, t:'離線站台節點具體顏色定義（設計確認後實作）', src:['G01'] },
     ]},
 
-    { id:'F01', name:'站台選擇總覽', pct:22, be_deps:['station-list'], tasks:[
+    { id:'F01', name:'站台選擇總覽', pct:18, be_deps:['station-list'], tasks:[
       { s:'todo',  p:'P0', t:'將卡片式總覽改為 24 欄多站台表格（含橫向捲動）', src:['F01','進度文檔P0'] },
       { s:'todo',  p:'P0', t:'實作三欄凍結（站台名稱、災害調度備援、備援放電測試 sticky）', src:['F01'] },
       { s:'todo',  p:'P0', t:'災害調度備援 / 備援放電測試 勾選、全選與下發（遙控密碼層級）', src:['F01','進度文檔P0'] },
@@ -273,13 +273,18 @@ const EPICS = [
       { s:'doing', p:'P1', t:'IsLoading / HasError 顯示狀態（目前僅 catch 例外，~30%）', src:['F01'] },
       { s:'todo',  q:true, t:'確認站台離線進入站台頁面的資料顯示策略（最後快照 vs 全空）', src:['F01'] },
       { s:'done',  t:'搜尋範圍確認：站台名稱 + 所屬區域均可搜尋（React demo 已驗證）', src:['F01'] },
+      { s:'todo',  p:'P1', t:'市電狀態欄位邏輯：(2) 0x1F0 → 1:供電中 / 0:停電', src:['F01','表三'] },
+      { s:'todo',  p:'P1', t:'停電次數欄位：(4) 0x208 顯示整數', src:['F01','表三'] },
+      { s:'todo',  p:'P1', t:'設備通訊狀態欄位：有訊息→正常 / 無訊息→異常', src:['F01','表三'] },
+      { s:'todo',  p:'P1', t:'電池通訊狀態三連燈號欄位：0x00/0x50/0xA0 → 三燈（綠:正常 / 紅:告警）', src:['F01','表三'] },
+      { s:'todo',  p:'P1', t:'電力轉移效率（元）欄位：(4) 0x200-0x203 − (4) 0x1FC-0x1FF 計算差值顯示', src:['F01','表三'] },
     ]},
   ]},
 
   /* ═══ E2: 即時監控總覽 ══════════════════════════════════ */
   { id:'E2', name:'即時監控總覽', color:'#8B5CF6', sub:'F02 · G02 · G03', layer:'fe', cards:[
 
-    { id:'F02', name:'站台運行總覽', pct:45, be_deps:['overview-data'], tasks:[
+    { id:'F02', name:'站台運行總覽', pct:35, be_deps:['overview-data'], tasks:[
       { s:'done',  t:'PowerFlowDiagram、BatteryStatusSection、StationInfoCard 嵌入；子 Panel Visibility 切換；3 秒輪詢', src:['F02'] },
       { s:'doing', p:'P0', t:'調整 2×4 導覽按鈕順序與名稱（設定→模式設定、登出→首頁已確認；排序與圖示對齊中，~55%）', src:['F02','進度文檔P0'] },
       { s:'todo',  p:'P0', t:'將 MainWindow 連線狀態紅色橫幅移至 G02 告警訊息區', src:['F02','G02','進度文檔P0'] },
@@ -289,6 +294,12 @@ const EPICS = [
       { s:'todo',  p:'P1', t:'Context Menu → 訊息歷史跳轉（NavigateToMessages，帶篩選參數至 F06）', src:['F02'] },
       { s:'todo',  p:'P2', t:'PowerFlowDiagram 縮放功能（＋/－ 按鈕或 MouseWheel ScaleTransform）', src:['F02','進度文檔P2'] },
       { s:'todo',  q:true, t:'確認可互動元素完整清單（哪些節點/數值支援右鍵）及 API 端點名稱', src:['F02'] },
+      { s:'todo',  p:'P1', t:'站台資料欄位對點：StationInfoCard 左中區塊各欄位 Modbus 暫存器對應確認與串接', src:['F02','表一'] },
+      { s:'todo',  p:'P0', t:'修正 AC Input Power 即時功率顯示 (4) 0x1E7-0x1E8（目前數值有誤）', src:['F02','表二'] },
+      { s:'todo',  p:'P0', t:'修正 AC Input Total 異常（目前顯示為 0）(4) 0x1F0-0x1F3', src:['F02','表二'] },
+      { s:'todo',  p:'P1', t:'PV Total / AC Output Total 數值 ÷1000 單位換算顯示（kWh）', src:['F02','表二'] },
+      { s:'todo',  p:'P1', t:'App 啟動預設首頁設定為「運行總覽」（目前登入後進入頁面待確認）', src:['F02','表五'] },
+      { s:'todo',  p:'P0', t:'修復頁面滾動條（ScrollViewer 設定，目前頁面無法下滑）', src:['F02','表五'] },
     ]},
 
     { id:'G02', name:'即時告警顯示', pct:22, be_deps:['alarm-bits'], tasks:[
@@ -303,7 +314,7 @@ const EPICS = [
       { s:'todo',  q:true, t:'確認聲音告警平台實作方式（Windows 系統聲 vs App 內嵌音效）', src:['G02'] },
     ]},
 
-    { id:'G03', name:'頂部列', pct:85, be_deps:['auth'], tasks:[
+    { id:'G03', name:'頂部列', pct:75, be_deps:['auth'], tasks:[
       { s:'done',  t:'系統即時時鐘每秒更新（CurrentClockText 已實作）', src:['G03'] },
       { s:'done',  t:'返回運行總覽按鈕（按鈕存在）', src:['G03'] },
       { s:'done',  t:'登出流程（LoginWindow + AuthStorageService + SessionContext.SignOut + /auth/logout endpoint 完整）', src:['G03','commit 1116788'] },
@@ -312,13 +323,15 @@ const EPICS = [
       { s:'todo',  p:'P2', t:'深色模式切換（UI 佔位已有，邏輯未串）', src:['G03'] },
       { s:'todo',  q:true, t:'確認語言切換是否必要、系統時鐘顯示本機 or 伺服器時間（登出→首頁已確認）', src:['G03'] },
       { s:'todo',  q:true, t:'登出按鈕 UX 位置統一（目前 QuickActionPanel + TopNavigationBar codebehind 並存）', src:['G03'] },
+      { s:'todo',  p:'P1', t:'返回按鈕文字改為「站台首頁」（目前文字待確認）', src:['G03','表五'] },
+      { s:'todo',  p:'P1', t:'新增「返回至電池狀態」導覽按鈕（從告警/逆變器頁面可跳回電池狀態頁）', src:['G03','表五'] },
     ]},
   ]},
 
   /* ═══ E3: 設備狀態監控 ══════════════════════════════════ */
   { id:'E3', name:'設備狀態監控', color:'#10B981', sub:'F03 · F04', layer:'fe', cards:[
 
-    { id:'F03', name:'混合型逆變器狀態', pct:55, be_deps:['device-points','alarm-bits'], tasks:[
+    { id:'F03', name:'混合型逆變器狀態', pct:45, be_deps:['device-points','alarm-bits'], tasks:[
       { s:'done',  t:'InverterDashboard 5 個狀態分組（StatusGroups）、PowerFlowDiagram、StatusBar、左側導覽按鈕框架', src:['F03'] },
       { s:'done',  t:'告警分類按鈕 5 個（交流輸入/太陽能輸入/交流輸出/電池/其他）已渲染', src:['F03'] },
       { s:'todo',  p:'P0', q:true, t:'確認告警歷史儲存機制（架構決策：SQLite 本地偵測暫存器變化 vs 硬體 push）', src:['F03'] },
@@ -327,9 +340,13 @@ const EPICS = [
       { s:'doing', p:'P1', t:'PrintCommand（呼叫系統列印對話框；失敗 Modal；離線 PDF 備選，按鈕已渲染，~10%）', src:['F03','進度文檔P1'] },
       { s:'doing', p:'P1', t:'SaveImageCommand（SaveFileDialog + PNG 輸出；失敗 Modal，按鈕已渲染，~10%）', src:['F03','進度文檔P1'] },
       { s:'todo',  p:'P1', t:'無資料 / 載入失敗狀態處理（IsLoading / HasError UI）', src:['F03'] },
+      { s:'todo',  p:'P1', t:'交流輸入狀態文字顯示「有/無」（市電充電，依點位邏輯）', src:['F03','表四'] },
+      { s:'todo',  p:'P1', t:'太陽能輸入狀態文字顯示「有/無」（太陽能充電，依點位邏輯）', src:['F03','表四'] },
+      { s:'todo',  p:'P1', t:'交流輸出狀態錯字修正：「逆變器過電故障」（原文字有誤）', src:['F03','表四'] },
+      { s:'todo',  p:'P1', t:'混合型逆變器大標標題改為中文（目前為英文或混用）', src:['F03','表四'] },
     ]},
 
-    { id:'F04', name:'電池狀態', pct:62, be_deps:['battery-status','alarm-bits'], tasks:[
+    { id:'F04', name:'電池狀態', pct:50, be_deps:['battery-status','alarm-bits'], tasks:[
       { s:'done',  t:'3 個模組 Overview Card、Tab 切換、SOC/SOH 環形圖、電壓/電流欄位、16 芯電壓長條圖', src:['F04'] },
       { s:'done',  t:'IStationDataProvider 已連接；SOC/SOH < 50% 自動變紅（G1 模組數量固定 3 個已確認）', src:['F04','協議'] },
       { s:'done',  t:'G2：整體彙總 VM 屬性完整（站級 SOC/SOH/電壓/電流/功率/BackupChargeLimit/BackupDischargeLimit）', src:['F04'] },
@@ -341,6 +358,11 @@ const EPICS = [
       { s:'todo',  p:'P2', t:'G8：將 code-behind UI 操作改為純 MVVM Binding（UpdateModuleStatus 重構）', src:['F04','進度文檔P2'] },
       { s:'todo',  q:true, t:'確認詳細資料「溫度/均衡」欄位協議暫存器位址（硬體廠商確認）', src:['F04'] },
       { s:'todo',  q:true, t:'確認設定告警條件暫存器位址（FC06 vs FC16，鋰鐵 vs 鈉鹽差異）', src:['F04'] },
+      { s:'todo',  p:'P1', t:'模組 1–3 區塊標籤補充「電壓、電流、溫度」欄位文字（目前缺少標示）', src:['F04','表四'] },
+      { s:'todo',  p:'P1', t:'模組狀態文字顯示「待機 / 充電 / 放電」依 (2) 0x02, 0x03 點位邏輯', src:['F04','表四'] },
+      { s:'todo',  p:'P1', t:'SOC / SOH 數值格式化顯示為整數（去除小數點）', src:['F04','表二'] },
+      { s:'todo',  p:'P1', t:'溫度數值格式化為整數，單位符號不重複顯示', src:['F04','表二'] },
+      { s:'todo',  p:'P0', t:'備援充電起點 / 備援充電終點 / 非備援放電終點可寫設定（FC06 寫入 (3) 0x040 / 0x041 / 0x046；F10 SettingWindow 對應欄位）', src:['F04','F10','表一'] },
     ]},
   ]},
 
@@ -398,13 +420,15 @@ const EPICS = [
       { s:'todo',  q:true, t:'確認必填欄位、執行權限（管理員？）、新增流程（dialog vs 獨立頁面）、批次匯入 CSV 需求', src:['F09'] },
     ]},
 
-    { id:'F10', name:'系統設定', pct:65, be_deps:['sys-settings','auth'], tasks:[
+    { id:'F10', name:'系統設定', pct:55, be_deps:['sys-settings','auth'], tasks:[
       { s:'doing', t:'SettingWindow 含 AlarmThresholds ObservableCollection（資料結構有，~60%；告警閾值編輯邏輯待補）', src:['F10'] },
       { s:'todo',  p:'P1', t:'釐清 F02/F10 邊界，拆分 SettingWindow 職責（站台資訊 vs 系統設定分離）', src:['F10','進度文檔P1'] },
       { s:'done',  t:'密碼帳號管理（UserManagementWindow CRUD 帳號 + 修改密碼 + 角色設定；後端 /api/v1/users 完整）', sp:['§6.6'], src:['F10','commit 1116788'] },
       { s:'done',  t:'角色權限 UI 控制（SettingPanel.ApplyAuthorization + QuickActionPanel.ApplyAuthorization + MainWindow SetupMenu 依 IsAdmin 隱藏）', src:['F10','commit 1116788'] },
       { s:'todo',  t:'設定版本控管/還原機制（IsDirty + ResetCommand）', src:['F10'] },
       { s:'todo',  q:true, t:'確認設定類別（連線/告警閾值/帳號/通知）、告警閾值是全域 or 每站台獨立', src:['F10'] },
+      { s:'todo',  p:'P1', t:'電力轉換效率設定：尖峰 / 離峰 / 非市電電價參數輸入（連結至維運設定頁面）', src:['F10','表一'] },
+      { s:'todo',  p:'P1', t:'效率計算式 Tooltip：游標懸停顯示公式提醒框（計算邏輯說明）', src:['F10','表一'] },
     ]},
 
     { id:'F11', name:'升級韌體（標 F05）', pct:5, be_deps:['firmware'], tasks:[
