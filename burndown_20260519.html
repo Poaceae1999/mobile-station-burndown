@@ -154,6 +154,7 @@ footer{text-align:center;padding:20px;color:#9CA3AF;font-size:11.5px;border-top:
       <li><span class="changelog-tag ct-confirm">仍 todo</span> <strong>F01 表三</strong>：市電狀態(0x1F0)、設備通訊三燈、電池通訊三燈尚未 wire 至 DTO（停電次數 PowerOutageCountText 已 binding）</li>
       <li><span class="changelog-tag ct-confirm">仍 todo</span> <strong>F05</strong> WPF point-group 多選控制項、PNG 圖匯出、對數刻度尚未實作（前端 ~12% 殘留）</li>
       <li><span class="changelog-tag ct-upd">資料</span> 燃盡圖 05-19：FE done 28 → 34 pts（F10 audit policy + tariff rate UI、F02 transfer-efficiency + tooltip、F04 backup SOC 寫設定、F05 報表 panel + CSV 共 +6 pts）；BE done 11 → 14 pts（audit_policy + station_tariff_rate + history 報表 +3 pts）</li>
+      <li><span class="changelog-tag ct-upd">圖表修正</span> 燃盡圖：(a) <code>spanGaps:true</code> 修正過去只有 5/18→5/19 才連線的問題；(b) 新增 <code>fe_total_at</code>/<code>be_total_at</code> 每日範圍快照，剩餘 = 當日 total − 當日 done（移除用今日 total 回推過去的前視偏誤）；(c) 新增「總範圍 Scope」與「累積完成 pts」雙線，顯示範圍隨任務新增上升的效應</li>
     </ul>
   </div>
 </div>
@@ -177,26 +178,40 @@ const TODAY  = '2026-05-19';
 /* 燃盡實際數據 ─ 剩餘 pts 以 null 開頭表示「由 renderer 自動填入 total」
    fe 總計由 EPICS layer=fe 動態算出（每次新增 task 自動生效）
    be 05-01 起始點同理自動填入                                       */
+/* 每日 total 與 done 同時紀錄，避免「用今天的 total 回推過去剩餘」的前視偏誤
+   total_at[i]  = 該日期當下 EPICS 已定義的 story points 總數（範圍）
+   done_at[i]   = 該日期累積已完成 pts
+   remaining(i) = total_at[i] − done_at[i]                              */
 const BURNDOWN = {
   fe: [
-    ['2026-05-01', null], // auto = fe total（renderer 動態填入）
-    ['2026-05-03', null], // WPF 基礎 shell 後：fe_total − 4
-    ['2026-05-06', null], // MVVM 重構後：     fe_total − 11
-    ['2026-05-09', null], // 各 Panel 嵌入後：  fe_total − 16（最終 done 數）
-    ['2026-05-12', null], // StationInfoCard；744a7b5 主要是後端，前端不動
-    ['2026-05-18', null], // 05-18 v2：含 1116788 + e778584 + a15b01d + 16c3656（Login + Audit）
-    ['2026-05-19', null], // 0a411af：Audit Policy + Tariff Rate + History 報表 + Tooltip 重整
+    ['2026-05-01', null], // 衝刺起點：原始範圍
+    ['2026-05-03', null], // WPF 基礎 shell
+    ['2026-05-06', null], // MVVM 重構
+    ['2026-05-09', null], // 各 Panel 嵌入
+    ['2026-05-12', null], // StationInfoCard；744a7b5 主要是後端
+    ['2026-05-18', null], // 1116788 + e778584 + a15b01d + 16c3656（Login + Audit），同時新增多個 F07/F10/G03 任務
+    ['2026-05-19', null], // 0a411af：Audit Policy + Tariff Rate + History 報表，同時新增 F02/F04/F05/F10/E0 任務
   ],
-  // 相對完成量（累積 done pts，renderer 用 total − delta 算剩餘）
-  fe_done_at: [0, 4, 11, 16, 16, 28, 34],
+  // 累積完成 pts（與 fe[] 對齊）
+  fe_done_at:  [0,   4,   11,  16,  16,  28,  34],
+  // 該日期當下 FE 總範圍（估計：含已知任務新增；今日 = countTasks 實算）
+  fe_total_at: [122, 122, 125, 128, 130, 137, 143],
 
   be: [
-    ['2026-05-01', null], // auto = be total
+    ['2026-05-01', null], // 預備期已完成 3 pts
     ['2026-05-12', null], // 744a7b5 完成 4 pts
     ['2026-05-18', null], // auth + op-log query + audit_operation_log 共 +4 pts
     ['2026-05-19', null], // audit_policy + station_tariff_rate + history 報表 共 +3 pts
   ],
-  be_done_at: [3, 7, 11, 14],     // 預備期 3；05-12 累積 7；05-18 v2 累積 11；05-19 累積 14
+  be_done_at:  [3,  7,  11, 14],
+  be_total_at: [13, 15, 17, 19],
+
+  // 範圍新增事件（用於圖上 annotation）
+  scope_events: [
+    { date:'2026-05-12', delta_fe:+3, delta_be:+2, note:'744a7b5 後端點位 / 告警位元定義入冊' },
+    { date:'2026-05-18', delta_fe:+7, delta_be:+2, note:'Login + Audit 四筆 commit 新增 F07/F10/G03 任務' },
+    { date:'2026-05-19', delta_fe:+6, delta_be:+2, note:'0a411af 新增 Audit Policy + Tariff + History 報表任務' },
+  ],
 };
 
 /* 前後端依賴對照（業務語言，無 API 名稱）
@@ -629,19 +644,25 @@ function sectionHdHTML(label, color, st) {
   </div>`;
 }
 
-/* ── 前後端合計燃盡數據合併 ── */
+/* ── 前後端合計燃盡數據合併（含每日 total 快照） ── */
 function mergedBurndown() {
-  const feDoneMap = Object.fromEntries(BURNDOWN.fe.map((r,i) => [r[0], BURNDOWN.fe_done_at[i]]));
-  const beDoneMap = Object.fromEntries(BURNDOWN.be.map((r,i) => [r[0], BURNDOWN.be_done_at[i]]));
+  const feDoneMap  = Object.fromEntries(BURNDOWN.fe.map((r,i) => [r[0], BURNDOWN.fe_done_at[i]]));
+  const beDoneMap  = Object.fromEntries(BURNDOWN.be.map((r,i) => [r[0], BURNDOWN.be_done_at[i]]));
+  const feTotalMap = Object.fromEntries(BURNDOWN.fe.map((r,i) => [r[0], BURNDOWN.fe_total_at[i]]));
+  const beTotalMap = Object.fromEntries(BURNDOWN.be.map((r,i) => [r[0], BURNDOWN.be_total_at[i]]));
   const allDates = [...new Set([...Object.keys(feDoneMap), ...Object.keys(beDoneMap)])].sort();
-  let lastFe = 0, lastBe = 0;
-  const dates = [], done_at = [];
+  let lastFeD=0, lastBeD=0, lastFeT=0, lastBeT=0;
+  const dates=[], done_at=[], total_at=[];
   allDates.forEach(date => {
-    if(feDoneMap[date] !== undefined) lastFe = feDoneMap[date];
-    if(beDoneMap[date] !== undefined) lastBe = beDoneMap[date];
-    dates.push(date); done_at.push(lastFe + lastBe);
+    if(feDoneMap[date]  !== undefined) lastFeD = feDoneMap[date];
+    if(beDoneMap[date]  !== undefined) lastBeD = beDoneMap[date];
+    if(feTotalMap[date] !== undefined) lastFeT = feTotalMap[date];
+    if(beTotalMap[date] !== undefined) lastBeT = beTotalMap[date];
+    dates.push(date);
+    done_at.push(lastFeD + lastBeD);
+    total_at.push(lastFeT + lastBeT);
   });
-  return { dates, done_at };
+  return { dates, done_at, total_at };
 }
 
 /* ── 統合渲染（單頁：E0 後端在前，E1–E7 前端在後） ── */
@@ -669,54 +690,69 @@ function toggleEpic(id) {
 /* ════════════════════════════════════════════════════════
    CHARTS  —  燃盡圖邏輯，從 BURNDOWN + 計算出 total 自動繪製
    ════════════════════════════════════════════════════════ */
-/* initBurndown
-   dates    : ['2026-05-01', ...]  有資料的日期列表
-   doneList : [0, 4, 11, ...]      各日期累積完成 pts（對齊 dates）
-   total    : 由 EPICS 動態計算
+/* initBurndown — 無前視偏誤版本
+   dates     : ['2026-05-01', ...]   有資料的日期列表
+   doneList  : [0, 4, 11, ...]       各日期累積完成 pts（對齊 dates）
+   totalList : [122, 122, 125, ...]  各日期當下的 total 範圍（對齊 dates）
+   實際剩餘 = totalList[i] − doneList[i]，避免用今日 total 回推過去
 */
-function initBurndown(canvasId, layer, dates, doneList, totalOverride) {
-  const total = totalOverride !== undefined ? totalOverride : countTasks(EPICS.filter(e => e.layer === layer)).total;
+function initBurndown(canvasId, dates, doneList, totalList) {
+  const totalToday = totalList[totalList.length - 1];
 
   const labels = [], idealPts = [];
   for (let d = 1; d <= 30; d++) {
     labels.push(`05-${String(d).padStart(2,'0')}`);
-    idealPts.push( +(total * (1 - (d-1)/29)).toFixed(1) );
+    // 理想線以「最終範圍」為基準
+    idealPts.push( +(totalToday * (1 - (d-1)/29)).toFixed(1) );
   }
 
-  // 建立日期→剩餘 pts 的映射
-  const remainMap = {};
+  // 建立 day → (剩餘, 範圍, 已完成) 映射
+  const remainMap = {}, scopeMap = {}, doneMap = {};
   dates.forEach((date, i) => {
     const day = parseInt(date.split('-')[2]);
-    remainMap[day] = total - doneList[i];
+    remainMap[day] = totalList[i] - doneList[i];
+    scopeMap[day]  = totalList[i];
+    doneMap[day]   = doneList[i];
   });
 
   const actualPts = labels.map((_, i) => remainMap[i+1] ?? null);
+  const scopePts  = labels.map((_, i) => scopeMap[i+1]  ?? null);
+  const donePts   = labels.map((_, i) => doneMap[i+1]   ?? null);
 
   new Chart(document.getElementById(canvasId).getContext('2d'), {
     type: 'line',
     data: {
       labels,
       datasets: [
-        { label:'理想燃盡線', data:idealPts, borderColor:'#D1D5DB',
+        { label:'理想燃盡線（依今日範圍）', data:idealPts, borderColor:'#D1D5DB',
           borderDash:[6,4], borderWidth:2, pointRadius:0, tension:0.1, fill:false },
-        { label:'實際剩餘', data:actualPts, borderColor:'#3B82F6',
-          borderWidth:2.5, pointRadius:4, pointBackgroundColor:'#3B82F6',
-          tension:0.1, fill:false, spanGaps:false },
+        { label:'總範圍 Scope（當日 total，會隨任務新增上升）', data:scopePts,
+          borderColor:'#F59E0B', borderWidth:2, borderDash:[2,3],
+          pointRadius:4, pointBackgroundColor:'#F59E0B',
+          tension:0, fill:false, spanGaps:true },
+        { label:'實際剩餘（當日 total − 當日 done）', data:actualPts,
+          borderColor:'#3B82F6', borderWidth:2.5,
+          pointRadius:4, pointBackgroundColor:'#3B82F6',
+          tension:0.1, fill:false, spanGaps:true },
+        { label:'累積完成 pts（無前視偏誤）', data:donePts,
+          borderColor:'#10B981', borderWidth:2,
+          pointRadius:3, pointBackgroundColor:'#10B981',
+          tension:0.1, fill:false, spanGaps:true },
       ]
     },
     options: {
       responsive:true, maintainAspectRatio:false,
       interaction:{ mode:'index', intersect:false },
       plugins:{
-        legend:{ position:'top', labels:{ font:{size:12}, usePointStyle:true } },
+        legend:{ position:'top', labels:{ font:{size:11}, usePointStyle:true, boxWidth:8 } },
         tooltip:{ callbacks:{ label: c => c.raw !== null
           ? c.dataset.label + ': ' + c.raw + ' pts' : '（尚無資料）' }}
       },
       scales:{
         x:{ ticks:{ font:{size:11}, callback:(_,i) => i%3===0 ? labels[i] : '' },
             grid:{ color:'#F3F4F6' } },
-        y:{ min:0, max:total+5,
-            title:{ display:true, text:'剩餘 pts', font:{size:11} },
+        y:{ min:0, max:totalToday+5,
+            title:{ display:true, text:'pts', font:{size:11} },
             grid:{ color:'#F3F4F6' } }
       }
     }
@@ -725,7 +761,7 @@ function initBurndown(canvasId, layer, dates, doneList, totalOverride) {
 
 // 前後端合計燃盡圖（單一圖表）
 const merged = mergedBurndown();
-initBurndown('chart-all', null, merged.dates, merged.done_at, countTasks(EPICS).total);
+initBurndown('chart-all', merged.dates, merged.done_at, merged.total_at);
 </script>
 </body>
 </html>
