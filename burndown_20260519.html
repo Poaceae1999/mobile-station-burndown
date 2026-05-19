@@ -118,7 +118,27 @@ footer{text-align:center;padding:20px;color:#9CA3AF;font-size:11.5px;border-top:
 <div class="page-header">
   <h1>移動基地台儲能管理系統 — 專案追蹤看板</h1>
   <p>資料來源：F01–F11, G01–G03, 材電0300-4 符合度分析, REF-權限定義, PROTOCOL-CONTEXT　｜　更新：2026-05-19　｜　含 0a411af Cloud APIs + WPF Station Features（Audit Policy + Tariff Rates + History Report + Tooltip Polishing）</p>
+  <button id="download-btn" onclick="downloadThisPage()" title="下載此頁面為 HTML 檔">⬇ 下載此頁面</button>
 </div>
+
+<style>
+#download-btn{position:fixed;top:16px;right:16px;z-index:9999;padding:8px 14px;background:#2563eb;color:#fff;border:none;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.15);transition:background .15s}
+#download-btn:hover{background:#1d4ed8}
+#download-btn:active{background:#1e40af}
+@media print{#download-btn{display:none}}
+</style>
+<script>
+function downloadThisPage(){
+  const html='<!DOCTYPE html>\n'+document.documentElement.outerHTML;
+  const blob=new Blob([html],{type:'text/html;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  const today=new Date().toISOString().slice(0,10).replace(/-/g,'');
+  const a=document.createElement('a');
+  a.href=url;a.download='burndown_'+today+'.html';
+  document.body.appendChild(a);a.click();
+  setTimeout(()=>{document.body.removeChild(a);URL.revokeObjectURL(url);},100);
+}
+</script>
 
 <div class="sprint-banner">
   <strong>預備期 04-07 ～ 04-30：</strong>架構設計、雲端 Pipeline、BXSJ Modbus 整合、部署架構。
