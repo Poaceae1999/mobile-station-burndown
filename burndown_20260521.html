@@ -205,40 +205,6 @@ function downloadThisPage(){
   </div>
 </div>
 
-<div class="changelog closed" id="changelog">
-  <div class="changelog-hd" onclick="document.getElementById('changelog').classList.toggle('closed')">
-    <div class="changelog-hd-dot"></div>
-    <div class="changelog-title">歷史更新 — 2026-05-19（含 0a411af：Cloud APIs + WPF Station Features）</div>
-    <div class="changelog-commits">
-      <span class="changelog-commit">0a411af cloud+wpf</span>
-    </div>
-    <div class="changelog-arrow">▾</div>
-  </div>
-  <div class="changelog-body">
-    <ul class="changelog-ul">
-      <li><span class="changelog-tag ct-done">Done ↑</span> <strong>F10</strong> 審計策略管理：AuditPolicyWindow（admin 啟用/停用 9 類操作記錄）+ audit_policy 資料表 + GET/PUT /audit-policies endpoint 全鏈路完整（原 todo）</li>
-      <li><span class="changelog-tag ct-done">Done ↑</span> <strong>F10</strong> 電力轉換效率設定（電價參數）：TariffRateSettingsWindow CRUD + station_tariff_rate 表 + IStationDataProvider 介面方法（GetStation/Create/Update/DeleteTariffRate）完整，預設 peak=6.40 / off-peak=2.40 / non-mains-peak=14.49（原 P1 todo）</li>
-      <li><span class="changelog-tag ct-done">Done ↑</span> <strong>F02 / 表一</strong> 電力轉移效率公式（後端 db.py:7146-7156）：with_mains × peak − utility × off_peak；without_mains × non_mains_peak（原 P1 todo）</li>
-      <li><span class="changelog-tag ct-done">Done ↑</span> <strong>F02</strong> StationInfoCard + TransferEfficiencyCard + PowerFlowDiagram 暫存器位址移至 ToolTip（hover 顯示），主標籤改為中文業務語意（原 表二/表四 部分 P1 todo）</li>
-      <li><span class="changelog-tag ct-done">Done ↑</span> <strong>F02</strong> 返回站台首頁導覽：StationOverviewPanel.NavigateToStationHome 已實作（原 表五 隱含需求）</li>
-      <li><span class="changelog-tag ct-done">Done ↑</span> <strong>F04</strong> 備援充電起點/終點 + 非備援放電終點寫設定：BatteryStatusPanel.xaml + BatteryStatusWindowViewModel 三欄位 + 暫存器 ToolTip（0x040/0x041/0x046）已 binding（原 P0 todo）</li>
-      <li><span class="changelog-tag ct-done">Done ↑</span> <strong>F05</strong> 後端歷史報表/曲線整合查詢：query_station_history（mode、timePreset、pointGroupCodes 展開、statistics、legend、table pivot、thresholds）完整；/api/v1/stations/{id}/history 已驗證（原 ready 但 partial）</li>
-      <li><span class="changelog-tag ct-done">Done ↑</span> <strong>F05</strong> AnalysisDashboardPanel 報表/表格樣式：RebuildDetailTable + 凍結首欄 + 序列可見性切換 + CSV 匯出（history-report 標籤）（原 doing）</li>
-      <li><span class="changelog-tag ct-done">Done ↑</span> <strong>E0</strong> audit_policy 表 + GET/PUT /audit-policies endpoint + _is_audit_action_enabled() 守門邏輯（原 missing）</li>
-      <li><span class="changelog-tag ct-done">Done ↑</span> <strong>E0</strong> station_tariff_rate 表 + 完整 CRUD endpoint + 預設值（peak 6.40 / off-peak 2.40 / non-mains 14.49）（原 missing）</li>
-      <li><span class="changelog-tag ct-done">Done ↑</span> <strong>E0</strong> history 報表查詢升級（point-group 展開、統計、表格、legend）已部署 AWS（原 ready 但 partial）</li>
-      <li><span class="changelog-tag ct-upd">更新 ↑</span> <strong>FE_BE_DEPS</strong>：sys-settings 由 missing → ready（audit-policy + tariff-rate 後端齊備）；history-data 維持 ready 並補上 point-group 報表能力</li>
-      <li><span class="changelog-tag ct-upd">更新 ↑</span> <strong>F02</strong> pct 35 → 55；<strong>F04</strong> pct 50 → 60；<strong>F05</strong> pct 75 → 88；<strong>F10</strong> pct 55 → 78；<strong>E0 CLOUD</strong> pct 55 → 68</li>
-      <li><span class="changelog-tag ct-confirm">仍 todo</span> <strong>§6.6 四等級密碼</strong>：DB 仍僅 admin/user 2 角色；<strong>§6.6.2</strong> 連續 3 次錯誤閉鎖 5 分鐘 — 後端仍無 attempt 計數 / lockout 邏輯</li>
-      <li><span class="changelog-tag ct-confirm">仍 todo</span> <strong>F06 AcknowledgeAlarm</strong>：IStationDataProvider 介面仍未補方法</li>
-      <li><span class="changelog-tag ct-confirm">仍 todo</span> <strong>F01 表三</strong>：市電狀態(0x1F0)、設備通訊三燈、電池通訊三燈尚未 wire 至 DTO（停電次數 PowerOutageCountText 已 binding）</li>
-      <li><span class="changelog-tag ct-confirm">仍 todo</span> <strong>F05</strong> WPF point-group 多選控制項、PNG 圖匯出、對數刻度尚未實作（前端 ~12% 殘留）</li>
-      <li><span class="changelog-tag ct-upd">資料</span> 燃盡圖 05-19：FE done 28 → 34 pts（F10 audit policy + tariff rate UI、F02 transfer-efficiency + tooltip、F04 backup SOC 寫設定、F05 報表 panel + CSV 共 +6 pts）；BE done 11 → 14 pts（audit_policy + station_tariff_rate + history 報表 +3 pts）</li>
-      <li><span class="changelog-tag ct-upd">圖表修正</span> 燃盡圖：(a) <code>spanGaps:true</code> 修正過去只有 5/18→5/19 才連線的問題；(b) 新增 <code>fe_total_at</code>/<code>be_total_at</code> 每日範圍快照，剩餘 = 當日 total − 當日 done（移除用今日 total 回推過去的前視偏誤）；(c) 新增「總範圍 Scope」與「累積完成 pts」雙線，顯示範圍隨任務新增上升的效應</li>
-    </ul>
-  </div>
-</div>
-
 <div id="main-pane" class="main-pane"></div>
 
 <footer id="footer-text"></footer>
