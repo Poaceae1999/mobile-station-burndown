@@ -117,7 +117,7 @@ footer{text-align:center;padding:20px;color:#9CA3AF;font-size:11.5px;border-top:
 
 <div class="page-header">
   <h1>移動基地台儲能管理系統 — 專案追蹤看板</h1>
-  <p>資料來源：F01–F11, G01–G03, 材電0300-4 符合度分析, REF-權限定義, PROTOCOL-CONTEXT　｜　更新：2026-05-22　｜　含 836fb08 feat(parser,db): per-pack power_w + balance_count_total；2b7300f feat(station-browser): curve data panel；f3baecd feat(stationManager): hierarchical curve TreeView；ef82259 fix: remove dead button refs；a28e6f8 feat: group node multi-series + 299/306 cell pointCode mapping</p>
+  <p>資料來源：F01–F11, G01–G03, 材電0300-4 符合度分析, REF-權限定義, PROTOCOL-CONTEXT　｜　更新：2026-05-22　｜　含 836fb08 feat(parser,db): per-pack power_w + balance_count_total；2b7300f feat(station-browser): curve data panel；f3baecd feat(stationManager): hierarchical curve TreeView；ef82259 fix: remove dead button refs；a28e6f8 feat: group node multi-series + 299/306 cell pointCode mapping；44f2fd5 (xuan): cloud alarm workflow + WPF schedule UI（station_schedule_template 4 模板 + AcknowledgeAlarm dialog + runtime stability hardening）</p>
   <button id="download-btn" onclick="downloadThisPage()" title="下載此頁面為 HTML 檔">⬇ 下載此頁面</button>
 </div>
 
@@ -148,13 +148,14 @@ function downloadThisPage(){
 <div class="changelog" id="changelog-today" style="border-color:#FCA5A5;background:#FEF2F2">
   <div class="changelog-hd" onclick="document.getElementById('changelog-today').classList.toggle('closed')">
     <div class="changelog-hd-dot" style="background:#DC2626"></div>
-    <div class="changelog-title" style="color:#991B1B">本次更新 — 2026-05-22（含 836fb08 + 2b7300f + f3baecd + ef82259 + a28e6f8：F05 曲線資料 TreeView 階層選單 + per-pack power 計算點）</div>
+    <div class="changelog-title" style="color:#991B1B">本次更新 — 2026-05-22（F05 曲線 TreeView 選單 + F08 排程 4 模板 + F06 告警確認 dialog + E0 runtime hardening）</div>
     <div class="changelog-commits">
       <span class="changelog-commit" style="background:#FECACA;color:#991B1B">836fb08 pack-metrics</span>
       <span class="changelog-commit" style="background:#FECACA;color:#991B1B">2b7300f browser-curve</span>
       <span class="changelog-commit" style="background:#FECACA;color:#991B1B">f3baecd treeview</span>
       <span class="changelog-commit" style="background:#FECACA;color:#991B1B">ef82259 cleanup</span>
       <span class="changelog-commit" style="background:#FECACA;color:#991B1B">a28e6f8 group-multi</span>
+      <span class="changelog-commit" style="background:#FECACA;color:#991B1B">44f2fd5 schedule+alarm+hardening</span>
     </div>
     <div class="changelog-arrow">▾</div>
   </div>
@@ -165,11 +166,17 @@ function downloadThisPage(){
       <li><span class="changelog-tag ct-done">Done ↑</span> <strong>E0 / Parser 衍生指標</strong>：cloud/common/parser.py 新增 _parse_green_power_v20260428_pack_metrics() — power_w = voltage_v × current_a（每 pack 即時功率）+ balance_count_total = Σ cell_1..16_balance_count（每 pack 平衡計數總和）；cloud/common/db.py +59 行：_build_green_power_v20260428_point_defs() 加入 module_{n}_power pointCode（對應 TreeView 的 g{n}_inv_bat_power 葉節點）— 對齊 F05 曲線選單需要的衍生點位（commit 836fb08）</li>
       <li><span class="changelog-tag ct-done">Done ↑</span> <strong>輔助工具 station_browser 曲線檢視面板</strong>：station_browser/app.py +14 行 + curve-menu.json 2868 行 + station.js +199 行 + station_detail.html +21 行 + app.css +144 行 — Flask 端站台檢視工具同步具備階層曲線選單（commit 2b7300f）</li>
       <li><span class="changelog-tag ct-upd">更新 ↑</span> <strong>F05 死碼清理</strong>：AnalysisDashboardPanel.xaml.cs 移除已從 XAML 刪除按鈕的 x:Name 殘留參考（Tag assignment + Visibility 區塊），避免 code-behind 編譯錯（commit ef82259）</li>
+      <li><span class="changelog-tag ct-done">Done ↑</span> <strong>F08 排程 4 模板系統（commit 44f2fd5 / xuan）</strong>：新增 station_schedule_template DB 表（profile_key: summer/winter/backup/custom 四模板 + mode_value 1-4 + schedule_json + source_register_snapshot_json + last_applied_by/at 稽核欄位 + unique(station_id, profile_key)）；首次讀取時以設備 FC3 0x002–0x039 快照初始化 4 套模板；切換模式時整套下發至設備。ScheduleWindowViewModel +1399 行 / SchedulePanel.xaml +637 / .xaml.cs +627 / ScheduleCellViewModel +137 + schedule-template-design.zh-TW.md 89 行設計文件</li>
+      <li><span class="changelog-tag ct-done">Done ↑</span> <strong>F06 告警狀態確認 dialog（commit 44f2fd5）</strong>：新增 AlarmStatusDialogService.cs 491 行（自訂 WPF 確認對話框 + Status/Label 選擇 + 卡片視覺狀態）；AlarmLogPanel.xaml.cs +104 行整合；AlarmLogWindowViewModel +44 行；AlarmLogEntryViewModel +3。後端 UpdateAlarmStatusAsync 提供者方法已就位（解除過去 F06 AcknowledgeAlarm 介面阻擋）</li>
+      <li><span class="changelog-tag ct-done">Done ↑</span> <strong>F07 操作紀錄面板強化（commit 44f2fd5）</strong>：OperationLogPanel.xaml +74 行 / OperationLogWindowViewModel +90 行 / OperationLogEntryViewModel +12 行 — UI/篩選/分頁細部補齊</li>
+      <li><span class="changelog-tag ct-done">Done ↑</span> <strong>E0 / Schedule Template CRUD endpoint（commit 44f2fd5）</strong>：IStationDataProvider 新增 GetStationScheduleTemplatesAsync / UpdateStationScheduleTemplateAsync / ApplyStationScheduleTemplateAsync / UpdateAlarmStatusAsync / GetStationCommandsAsync（共 +20 介面方法、HttpStationDataProvider +77、MockStationDataProvider +673、StationApiDtos +155）；cloud/services/api/main.py +157、cloud/common/db.py +900 配套 endpoint 與 helper</li>
+      <li><span class="changelog-tag ct-done">Done ↑</span> <strong>E0 / Runtime Stability Hardening（commit 44f2fd5）</strong>：因應 2026-05-21 AWS 事件（RabbitMQ 中斷 + DB 連線池耗盡 + token 驗證每請求 update last_seen_at 造成 session 鎖競爭）—— cloud/common/config.py + db.py 加入 DB_POOL_MIN_SIZE / MAX_SIZE / TIMEOUT_SECONDS 環境變數（建議 1 / 15 / 5）；新增 cloud/scripts/prune_runtime_data.sh 過期資料清理；cloud/docs/runtime-stability-hardening.md 137 行 incident postmortem；cloud/db/cloud_schema_v1.sql 新增 idx_raw_message_station_group_latest_supported partial index 加速最新一筆查詢；station_modbus_bridge_simulator.py +103 行強化模擬器</li>
+      <li><span class="changelog-tag ct-upd">更新 ↑</span> <strong>FE_BE_DEPS schedule-dispatch</strong>：partial → ready（station_schedule_template CRUD + Apply endpoint 全就緒；前端 ScheduleWindowViewModel 完整實作）；<strong>FE_BE_DEPS schedule-read</strong>：missing → ready（GetStationScheduleTemplatesAsync 已串接）</li>
       <li><span class="changelog-tag ct-confirm">仍 todo</span> <strong>F05</strong>：PNG 圖匯出、對數刻度顯示、AI 6 秒取樣（§4.4.4(6)(d)）仍未實作</li>
-      <li><span class="changelog-tag ct-confirm">仍 todo</span> <strong>F06 AcknowledgeAlarm</strong>：IStationDataProvider 介面方法仍未補；alert_rules_worker L2/L3 引擎依 spec 計算仍待驗證</li>
+      <li><span class="changelog-tag ct-confirm">仍 todo</span> <strong>F06</strong>：alert_rules_worker L2/L3 引擎依 spec 計算仍待驗證</li>
       <li><span class="changelog-tag ct-confirm">仍 todo</span> <strong>§6.6 四等級密碼</strong>：DB 仍僅 admin/user 2 角色；§6.6.2 連續 3 次錯誤閉鎖 5 分鐘仍 todo</li>
-      <li><span class="changelog-tag ct-confirm">仍 todo</span> <strong>F08 Schedule Save handler / F11 韌體升級流程</strong> 仍 todo</li>
-      <li><span class="changelog-tag ct-upd">資料</span> 燃盡圖 05-22：FE done 43 → 45 pts（F05 階層 TreeView 選單 +1、群組多序列 + 完整 pointCode mapping +1）；BE done 18 → 19 pts（parser/db per-pack power_w + balance_count_total 衍生點 +1）</li>
+      <li><span class="changelog-tag ct-confirm">仍 todo</span> <strong>F11 韌體升級流程</strong> 仍 todo</li>
+      <li><span class="changelog-tag ct-upd">資料</span> 燃盡圖 05-22：FE done 43 → 50 pts（F05 階層 TreeView 選單 +1、群組多序列 + 完整 pointCode mapping +1、F08 排程 4 模板 UI/VM/Apply +3、F06 AcknowledgeAlarm dialog +1、F07 操作紀錄 polish +1）；BE done 18 → 22 pts（parser/db per-pack power 衍生點 +1、station_schedule_template 表 + CRUD +2、Runtime Hardening + prune + 索引 +1）</li>
     </ul>
   </div>
 </div>
@@ -233,12 +240,12 @@ const BURNDOWN = {
     ['2026-05-19', null], // 0a411af：Audit Policy + Tariff Rate + History 報表，同時新增 F02/F04/F05/F10/E0 任務
     ['2026-05-20', null], // 692319a + fff9c06：AlarmSettings 完全改寫 + alarm spec 規格庫 + LoadingOverlay + Dashboard 強化
     ['2026-05-21', null], // a7f269a + e86a25a：啟動導覽守門 + PowerFlowDiagram 由 live register 初始化（regression fix）
-    ['2026-05-22', null], // f3baecd + a28e6f8 + ef82259 (+2b7300f browser)：F05 階層曲線 TreeView + 群組多序列 + 死碼清理
+    ['2026-05-22', null], // F05 階層 TreeView + F08 排程 4 模板（44f2fd5 xuan）+ F06 AcknowledgeAlarm dialog + F07 ops log polish
   ],
   // 累積完成 pts（與 fe[] 對齊）
-  fe_done_at:  [0,   4,   11,  16,  16,  28,  34,  42,  43,  45],
+  fe_done_at:  [0,   4,   11,  16,  16,  28,  34,  42,  43,  50],
   // 該日期當下 FE 總範圍（估計：含已知任務新增；今日 = countTasks 實算）
-  fe_total_at: [122, 122, 125, 128, 130, 137, 143, 146, 146, 146],
+  fe_total_at: [122, 122, 125, 128, 130, 137, 143, 146, 146, 149],
 
   be: [
     ['2026-05-01', null], // 預備期已完成 3 pts
@@ -247,10 +254,10 @@ const BURNDOWN = {
     ['2026-05-19', null], // audit_policy + station_tariff_rate + history 報表 共 +3 pts
     ['2026-05-20', null], // alarm spec 規格庫 + alarm setting CRUD endpoint 共 +4 pts
     ['2026-05-21', null], // 無後端變動，持平資料點
-    ['2026-05-22', null], // 836fb08：parser/db per-pack power_w + balance_count_total 衍生點 +1
+    ['2026-05-22', null], // 836fb08 衍生點 + 44f2fd5 station_schedule_template CRUD + runtime hardening
   ],
-  be_done_at:  [3,  7,  11, 14, 18, 18, 19],
-  be_total_at: [13, 15, 17, 19, 22, 22, 23],
+  be_done_at:  [3,  7,  11, 14, 18, 18, 22],
+  be_total_at: [13, 15, 17, 19, 22, 22, 26],
 
   // 範圍新增事件（用於圖上 annotation）
   scope_events: [
@@ -258,7 +265,7 @@ const BURNDOWN = {
     { date:'2026-05-18', delta_fe:+7, delta_be:+2, note:'Login + Audit 四筆 commit 新增 F07/F10/G03 任務' },
     { date:'2026-05-19', delta_fe:+6, delta_be:+2, note:'0a411af 新增 Audit Policy + Tariff + History 報表任務' },
     { date:'2026-05-20', delta_fe:+3, delta_be:+3, note:'692319a + fff9c06 新增 AlarmSettings UI + alarm spec 規格庫任務' },
-    { date:'2026-05-22', delta_fe:0,  delta_be:+1, note:'836fb08 新增 per-pack power_w + balance_count_total 衍生點任務' },
+    { date:'2026-05-22', delta_fe:+3, delta_be:+4, note:'836fb08 衍生點 + 44f2fd5 station_schedule_template 4 模板 + AcknowledgeAlarm dialog + runtime hardening' },
   ],
 };
 
@@ -276,10 +283,10 @@ const FE_BE_DEPS = [
   { id:'alarm-bits',        fe:'告警閃爍視覺狀態機所需位元定義',      layer:'G02 · F03 · F04',   be:'控制器故障與告警位元對應表（已完整定義）', status:'ready',   p:'P0' },
   { id:'alarm-records',     fe:'告警紀錄清單（F06）',                layer:'F06',               be:'站台告警記錄查詢（含等級/狀態/時間）',    status:'ready',   p:'P0' },
   { id:'history-data',      fe:'歷史趨勢曲線資料 + 報表/點群查詢',     layer:'F05',               be:'點位歷史查詢 + 報表/曲線雙模式 + point-group 展開 + statistics/legend（0a411af）', status:'ready',   p:'P2' },
-  { id:'schedule-dispatch', fe:'排程指令下發至設備',                 layer:'F08',               be:'控制指令寫入路徑（部分就緒）',            status:'partial', p:'P0' },
+  { id:'schedule-dispatch', fe:'排程指令下發至設備',                 layer:'F08',               be:'station_schedule_template + Apply endpoint 全就緒（44f2fd5）',            status:'ready', p:'P0' },
   // ── 後端尚未實作，前端被阻擋 ──────────────────────────────
   { id:'op-log',            fe:'操作事件紀錄清單（F07）',             layer:'F07',               be:'操作事件記錄查詢（已就緒，6 類審計 + 多維篩選）', status:'ready', p:'P0' },
-  { id:'schedule-read',     fe:'排程讀回（從設備讀取現有排程）',       layer:'F08',               be:'排程設定讀取服務',                       status:'missing', p:'P1' },
+  { id:'schedule-read',     fe:'排程讀回（從設備讀取現有排程）',       layer:'F08',               be:'GetStationScheduleTemplatesAsync + 4 模板初始化已就緒（44f2fd5）',                       status:'ready', p:'P1' },
   { id:'auth',              fe:'登入畫面與密碼驗證',                  layer:'G03 · F10 · §6.6',  be:'使用者認證（已就緒，2 角色 admin/user；§6.6 四等級+§6.6.2 閉鎖仍 todo）', status:'partial', p:'P0' },
   { id:'new-station',       fe:'新增站台流程',                        layer:'F09',               be:'站台新增/註冊服務',                      status:'missing', p:'P1' },
   { id:'sys-settings',      fe:'系統設定讀取與儲存（告警閾值 / 審計策略 / 電價）', layer:'F10',     be:'audit_policy + station_tariff_rate + station_alarm_setting/bit_setting CRUD endpoint 全就緒（0a411af / 692319a）；告警 spec 規格庫已建立（threshold/alarm-spec.json）', status:'ready', p:'P1' },
@@ -300,7 +307,7 @@ const BE_FE_WAITING = [
   { be:'趨勢資料查詢 + 報表/點群（已就緒，0a411af）',  fe_waiting:['F05 歷史趨勢曲線（已串接報表 + CSV 匯出）'] },
   { be:'審計策略 / 電價參數 CRUD（已就緒，0a411af）',  fe_waiting:['F10 AuditPolicyWindow（已串接）','F10 TariffRateSettingsWindow（已串接）'] },
   { be:'告警設定 CRUD + 規格庫（已就緒，692319a）',     fe_waiting:['F10 AlarmSettingsWindow（已串接，上下限+狀態告警雙模式 L1/L2/L3）'] },
-  { be:'控制指令寫入（部分就緒）',            fe_waiting:['F08 排程儲存', 'F01 調度備援下發'] },
+  { be:'station_schedule_template CRUD + Apply（已就緒，44f2fd5）',            fe_waiting:['F08 SchedulePanel 4 模板（已串接）','F01 調度備援下發'] },
   { be:'認證與密碼管理（已就緒 2 角色；§6.6 四等級+閉鎖仍 todo）', fe_waiting:['§6.6 四等級密碼強制執行', '§6.6.2 連續 3 次錯誤閉鎖 5 分鐘'] },
   { be:'操作記錄查詢（已就緒，6 類審計 + 多維篩選）',  fe_waiting:['F07 操作紀錄清單（已串接）'] },
   { be:'TP↔CP 上報介面（⚠️ 待 CHT 協定文件）',fe_waiting:['所有站台資料向 CHT 行電中心上報'] },
@@ -468,18 +475,19 @@ const EPICS = [
   /* ═══ E5: 告警與操作紀錄 ════════════════════════════════ */
   { id:'E5', name:'告警與操作紀錄', color:'#EF4444', sub:'F06 · F07', layer:'fe', cards:[
 
-    { id:'F06', name:'告警紀錄', pct:65, be_deps:['alarm-records'], tasks:[
+    { id:'F06', name:'告警紀錄', pct:80, be_deps:['alarm-records'], tasks:[
       { s:'done', t:'告警規格庫（cloud/spec/alarm/）：alarm-spec.json 2194 行（含 L1/L2/L3 alarmLevel）+ threshold-spec.json 4666 行；4 階段 pipeline（extract/expand/convert/validate）+ import 腳本+ validation-report；F06 顯示時可正確套等級色彩', src:['F06','commit 692319a'] },
       { s:'done',  t:'AlarmLogWindow UI 框架（CountTabItemViewModel 已含 Key 屬性、mock 資料、篩選 Tab 已有）', src:['F06','commit e778584'] },
-      { s:'todo',  p:'P0', t:'修復 AlarmLogEntryViewModel auto-property binding bug（OnPropertyChanged 未呼叫，UI 不更新）— F07 已修，F06 entry 仍待驗證', src:['F06','進度文檔P0'] },
-      { s:'doing', p:'P0', t:'從後台取得站台告警記錄（查詢服務已就緒，WPF 串接進度 ~70%）', src:['F06'] },
-      { s:'todo',  t:'實作確認告警動作（AcknowledgeCommand，後端 POST /api/v1/stations/{id}/alarms/{alarmId}/acknowledge 已存在；IStationDataProvider 介面尚未加方法）', sp:['§6.5'], src:['F06','REF','E0審查'] },
+      { s:'done',  t:'AlarmLogEntryViewModel +3 行 / AlarmLogWindowViewModel +44 行 / AlarmLogPanel.xaml.cs +104 行：binding 與互動補齊', src:['F06','commit 44f2fd5'] },
+      { s:'done',  p:'P0', t:'從後台取得站台告警記錄（HttpStationDataProvider 已串真實 API）', src:['F06','commit 44f2fd5'] },
+      { s:'done',  t:'確認告警動作（AlarmStatusDialogService 491 行新增：自訂 WPF 確認對話框 + Status/Label 卡片視覺狀態；UpdateAlarmStatusAsync 提供者方法已實作）', sp:['§6.5'], src:['F06','commit 44f2fd5'] },
       { s:'todo',  t:'告警記錄必要欄位：機房名/群名/I/O名/狀態/等級/發生時間/確認時間/恢復時間/持續時間', sp:['§6.5.2'], src:['F06'] },
       { s:'todo',  q:true, t:'告警篩選維度定義（時間範圍/等級/分區/狀態 active/resolved/acknowledged）', src:['F06'] },
       { s:'todo',  q:true, t:'確認告警匯出功能需求（ExportCommand，格式 CSV or Excel）', src:['F06'] },
     ]},
 
-    { id:'F07', name:'操作紀錄', pct:85, be_deps:['op-log'], tasks:[
+    { id:'F07', name:'操作紀錄', pct:92, be_deps:['op-log'], tasks:[
+      { s:'done',  t:'OperationLogPanel +74 行 / OperationLogWindowViewModel +90 行 / OperationLogEntryViewModel +12 行：UI/篩選/分頁細部補齊', src:['F07','commit 44f2fd5'] },
       { s:'done',  t:'OperationLogWindow UI 框架（OperationLogPanel + ItemsControl bindings 完整）', src:['F07'] },
       { s:'done',  t:'OperationLogEntryViewModel binding bug 修復（ObservableObject + OnPropertyChanged 已正確呼叫）', src:['F07','commit e778584'] },
       { s:'done',  t:'從後台取得操作事件記錄（HttpStationDataProvider.GetAuditLogsAsync 已串真實 /api/v1/audit-logs）', src:['F07','commit e778584','commit a15b01d','commit 16c3656'] },
@@ -493,10 +501,11 @@ const EPICS = [
   /* ═══ E6: 系統控制與設定 ════════════════════════════════ */
   { id:'E6', name:'系統控制與設定', color:'#6B7280', sub:'F08 · F09 · F10 · F11（升級韌體）', layer:'fe', cards:[
 
-    { id:'F08', name:'排程設定', pct:20, be_deps:['schedule-dispatch','schedule-read'], tasks:[
+    { id:'F08', name:'排程設定', pct:85, be_deps:['schedule-dispatch','schedule-read'], tasks:[
       { s:'done',  t:'ScheduleWindow 週排程表格 UI（ObservableCollection Rows、mock 資料、HHMM 暫存器映射）', src:['F08'] },
-      { s:'todo',  p:'P0', t:'排程指令下發至設備（Save button 無 Click handler，下發邏輯尚未實作，0%）', src:['F08'] },
-      { s:'todo',  t:'排程讀回（從設備讀取現有排程設定，後台服務尚未實作）', src:['F08'] },
+      { s:'done',  t:'4 模板系統（summer/winter/backup/custom）：ScheduleWindowViewModel +1399 行 / SchedulePanel.xaml +637 / .xaml.cs +627 / ScheduleCellViewModel +137 / schedule-template-design.zh-TW.md 89 行設計文件', src:['F08','commit 44f2fd5'] },
+      { s:'done',  p:'P0', t:'排程指令下發至設備：ApplyStationScheduleTemplateAsync 提供者方法已實作，切換模式時整套下發至 FC3 0x002–0x039', src:['F08','commit 44f2fd5'] },
+      { s:'done',  t:'排程讀回：GetStationScheduleTemplatesAsync 已實作，首次讀取以設備 FC3 0x002–0x039 快照初始化 4 套模板（source_register_snapshot_json）', src:['F08','commit 44f2fd5'] },
       { s:'todo',  q:true, t:'排程衝突處理邏輯', src:['F08'] },
       { s:'todo',  q:true, t:'確認排程操作對象（模式/功率限制/時段）、時間粒度（小時 vs 分鐘）、單台 or 多台套用', src:['F08'] },
     ]},
@@ -549,7 +558,7 @@ const EPICS = [
   /* ═══ E0: 雲端後端基礎 ══════════════════════════════════ */
   { id:'E0', name:'雲端後端基礎', color:'#0EA5E9', sub:'Cloud pipeline · API · Protocol · 認證', layer:'be', cards:[
 
-    { id:'CLOUD', name:'後端 API 與協議連結', pct:80, tasks:[
+    { id:'CLOUD', name:'後端 API 與協議連結', pct:88, tasks:[
       { s:'done', t:'Parser/DB 衍生指標：parser.py _parse_green_power_v20260428_pack_metrics()（power_w = voltage_v × current_a；balance_count_total = Σ cell_1..16_balance_count）+ db.py _build_green_power_v20260428_point_defs() 加入 module_{n}_power pointCode（對應 g{n}_inv_bat_power 葉節點），對齊 F05 階層曲線選單的衍生點位需求', fe_wt:['F05 階層曲線 TreeView'], src:['E0','commit 836fb08'] },
       { s:'done', t:'告警 / 上下限規格庫建立（cloud/spec/alarm/）：alarm-spec.json 2194 行（L1/L2/L3 alarmLevel 標記）+ threshold-spec.json 4666 行 + 4 階段 pipeline（DOCX → 原始 JSON → range 展開 → resolution/公式轉換 → 12 項一致性檢查）+ import_default_alarm_specs.sh + validation-report.txt', fe_wt:['F06 告警等級顯示','F10 AlarmSettingsWindow'], src:['E0','commit 692319a'] },
       { s:'done', t:'站台告警設定 CRUD endpoint（station_alarm_setting + station_alarm_bit_setting）+ cloud/services/api/main.py +42 行 + cloud/common/db.py +279 行（含 alarm setting helpers）', fe_wt:['F10 AlarmSettingsWindow'], src:['E0','commit 692319a'] },
@@ -565,7 +574,9 @@ const EPICS = [
       { s:'done',  t:'審計策略服務（audit_policy 表 + GET/PUT /audit-policies endpoint + _is_audit_action_enabled() 守門邏輯，9 類操作可由 admin 開關）', fe_wt:['F10 AuditPolicyWindow'], src:['commit 0a411af'] },
       { s:'done',  t:'站台電價設定（station_tariff_rate 表 + 完整 CRUD endpoint + defaults peak 6.40 / off-peak 2.40 / non-mains-peak 14.49；transfer_benefit_amount 後端公式 db.py:7146-7156）', fe_wt:['F10 TariffRateSettingsWindow','F02 TransferEfficiencyCard'], sp:['§4.4.4'], src:['commit 0a411af'] },
       { s:'done',  t:'歷史/曲線報表查詢升級（query_station_history：mode/timePreset/pointGroupCodes 展開/statistics/legend/table pivot/thresholds 全套；已部署 AWS）', fe_wt:['F05 曲線資料頁 + 報表模式'], src:['commit 0a411af'] },
-      { s:'doing', p:'P0', t:'IStationDataProvider 已補 login/auth/users/audit/audit-policy（extensions）/tariff-rate（共 +25 方法）；仍缺 WriteSchedule、AcknowledgeAlarm、SendCommand、UpgradeFirmware（阻擋 F06 ACK、F08、F11）', src:['E0審查','commit 1116788','commit e778584','commit 0a411af'] },
+      { s:'done', t:'IStationDataProvider 已補 login/auth/users/audit/audit-policy/tariff-rate/UpdateAlarmStatusAsync/GetStationScheduleTemplatesAsync/UpdateStationScheduleTemplateAsync/ApplyStationScheduleTemplateAsync/GetStationCommandsAsync（44f2fd5 新增 +20 介面方法；StationApiDtos +155 / HttpStationDataProvider +77 / MockStationDataProvider +673）；仍缺 UpgradeFirmware（阻擋 F11）', src:['E0審查','commit 1116788','commit e778584','commit 0a411af','commit 44f2fd5'] },
+      { s:'done', t:'station_schedule_template 資料表 + Apply endpoint（44f2fd5）：profile_key (summer/winter/backup/custom) + mode_value 1–4 + schedule_json + source_register_snapshot_json + last_applied_by/at + unique(station_id, profile_key)；cloud/services/api/main.py +157 / cloud/common/db.py +900', fe_wt:['F08 SchedulePanel 4 模板'], src:['E0','commit 44f2fd5'] },
+      { s:'done', t:'Runtime Stability Hardening（44f2fd5）— 因應 2026-05-21 AWS 事件：DB_POOL_MIN_SIZE/MAX_SIZE/TIMEOUT_SECONDS 環境變數 + prune_runtime_data.sh + idx_raw_message_station_group_latest_supported partial index + runtime-stability-hardening.md 137 行 incident postmortem + station_modbus_bridge_simulator +103 行', src:['E0','commit 44f2fd5'] },
       { s:'todo',  p:'P0', q:true, t:'與 CHT 行電中心的資料上報及命令接收介面（協定文件待 CHT 提供，最高優先外部依賴）', fe_wt:['所有站台向 CHT 上報'], sp:['4.4.4(2)'], src:['符合度分析'] },
       { s:'todo',  p:'P1', t:'確認測量命令 5 秒響應符合規格，並壓測 1,400 台並行承載上限', sp:['4.4.4(6)(c)'], src:['符合度分析'] },
       { s:'todo',  t:'過期控制指令清理排程（防止指令堆積影響資料庫效能）', src:['符合度分析'] },
