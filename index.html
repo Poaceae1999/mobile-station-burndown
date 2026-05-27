@@ -117,7 +117,7 @@ footer{text-align:center;padding:20px;color:#9CA3AF;font-size:11.5px;border-top:
 
 <div class="page-header">
   <h1>移動基地台儲能管理系統 — 專案追蹤看板</h1>
-  <p>資料來源：F01–F11, G01–G03, 材電0300-4 符合度分析, REF-權限定義, PROTOCOL-CONTEXT　｜　更新：2026-05-27　｜　含 deefa39 + 1971876 + 05594e2 + 37d3938 AnalysisDashboardPanel 大幅強化（圖表標題、明細表修正、threshold 顯示、CSV 匯出 bug fix、hover 空區域行為修正，xaml.cs 累計新增 ~1500 行）；3679f36 MockData 大規模刷新（station-points.json +3014 / curve-menu.json -1452 / station-history-query.json +387）+ HttpStationDataProvider timeout 與 MainWindow layout 微調；25c34e0 csproj 修復（補上 BackupControlSettings + RoleManagement 漏失的 Page 編譯項，修復隱性 build regression）；merge 修補（8b63ce6 + 06c5a21 + 0f03d86 + 7c3029a：合併 origin/main 並還原 xuan 的 StationSnapshotMapper power-flow 偵測邏輯與 StationViewModel binding）</p>
+  <p>資料來源：F01–F11, G01–G03, 材電0300-4 符合度分析, REF-權限定義, PROTOCOL-CONTEXT　｜　更新：2026-05-27　｜　含 deefa39/1971876/3679f36/44125a1/86c16f4/05594e2/37d3938/25c34e0/7c3029a/0f03d86 — F05 AnalysisDashboardPanel 大規模強化（chart title + detail table + threshold + CSV export + hover empty regions + 1w/1mo + xma 支援）；F08 SchedulePanel 484 行重整 + ScheduleWindowViewModel 463 行收斂；F03 StationSnapshotMapper 還原 xuan power flow detection；station-points.json +3014 行 mock 擴充（含 station-history-query mock）；BatteryModuleCard/PowerFlowDiagram/RegisterContextMenuService 細部 polish；csproj 補 BackupControlSettings/RoleManagement Page entries（修 build 漏）</p>
   <button id="download-btn" onclick="downloadThisPage()" title="下載此頁面為 HTML 檔">⬇ 下載此頁面</button>
 </div>
 
@@ -148,33 +148,35 @@ function downloadThisPage(){
 <div class="changelog" id="changelog-today" style="border-color:#FCA5A5;background:#FEF2F2">
   <div class="changelog-hd" onclick="document.getElementById('changelog-today').classList.toggle('closed')">
     <div class="changelog-hd-dot" style="background:#DC2626"></div>
-    <div class="changelog-title" style="color:#991B1B">本次更新 — 2026-05-27（F05 AnalysisDashboard 大幅強化：圖表標題 / 明細表 / threshold / CSV 匯出 bug fix / hover 空區域 + MockData 大規模刷新 + csproj 漏失 Page 修補 + merge 修補還原 xuan 的 power-flow / StationViewModel）</div>
+    <div class="changelog-title" style="color:#991B1B">本次更新 — 2026-05-27（F05 AnalysisDashboardPanel 大規模強化 + F08 SchedulePanel 484 行重整 + F03 power flow detection 還原 + mock data 大規模擴充 + csproj build 修復）</div>
     <div class="changelog-commits">
-      <span class="changelog-commit" style="background:#FECACA;color:#991B1B">deefa39 chart+detail+threshold+export</span>
-      <span class="changelog-commit" style="background:#FECACA;color:#991B1B">1971876 ui-feedback</span>
-      <span class="changelog-commit" style="background:#FECACA;color:#991B1B">05594e2 csv-fix</span>
-      <span class="changelog-commit" style="background:#FECACA;color:#991B1B">37d3938 hover-empty</span>
-      <span class="changelog-commit" style="background:#FECACA;color:#991B1B">3679f36 mock+timeout</span>
-      <span class="changelog-commit" style="background:#FECACA;color:#991B1B">25c34e0 csproj</span>
-      <span class="changelog-commit" style="background:#FECACA;color:#991B1B">06c5a21 +3 merge</span>
+      <span class="changelog-commit" style="background:#FECACA;color:#991B1B">deefa39 analysis improvements</span>
+      <span class="changelog-commit" style="background:#FECACA;color:#991B1B">3679f36 mock data +3548</span>
+      <span class="changelog-commit" style="background:#FECACA;color:#991B1B">44125a1 alarm+flow</span>
+      <span class="changelog-commit" style="background:#FECACA;color:#991B1B">1971876 curve UI</span>
+      <span class="changelog-commit" style="background:#FECACA;color:#991B1B">86c16f4 1w/1mo+xma</span>
+      <span class="changelog-commit" style="background:#FECACA;color:#991B1B">05594e2 CSV fix</span>
+      <span class="changelog-commit" style="background:#FECACA;color:#991B1B">37d3938 hover fix</span>
+      <span class="changelog-commit" style="background:#FECACA;color:#991B1B">25c34e0 csproj fix</span>
+      <span class="changelog-commit" style="background:#FECACA;color:#991B1B">7c3029a mapper</span>
+      <span class="changelog-commit" style="background:#FECACA;color:#991B1B">0f03d86 mapper</span>
     </div>
     <div class="changelog-arrow">▾</div>
   </div>
   <div class="changelog-body" style="border-top-color:#FCA5A5">
     <ul class="changelog-ul">
-      <li><span class="changelog-tag ct-done">Done ↑</span> <strong>F05 AnalysisDashboardPanel 圖表標題 + 明細表 + threshold + 匯出（commit deefa39）</strong>：xaml.cs +1213 行 / xaml +383 行 — 圖表標題顯示完整 metric/單位；RebuildDetailTable 多項修正；threshold 線條顯示邏輯；匯出 / 列印按鈕流程強化（含 PrintCommand / SaveImageCommand 整體骨架補齊）</li>
-      <li><span class="changelog-tag ct-done">Done ↑</span> <strong>F05 多項 UI 回饋（commit 1971876）</strong>：xaml.cs +190 行 / xaml +44 行 — 曲線 chart 與報表多項細節回饋（hover、tooltip、metric switch 樣式對齊）</li>
-      <li><span class="changelog-tag ct-done">Done ↑</span> <strong>F05 CSV 匯出空欄位 bug fix（commit 05594e2）</strong>：xaml.cs ±10 行 — 修正 CSV 匯出所有資料欄位皆為空的問題（屬 regression fix；F05 匯出功能恢復可用）</li>
-      <li><span class="changelog-tag ct-done">Done ↑</span> <strong>F05 hover 空區域顯示修正（commit 37d3938）</strong>：xaml.cs +16/-8 行 — 滑鼠 hover 在無資料區段時顯示「--」並標示實際游標時間，UX 對齊驗收</li>
-      <li><span class="changelog-tag ct-done">Done ↑</span> <strong>F10 csproj 漏失 Page 修補（commit 25c34e0）</strong>：stationManager.csproj +6 行 — 補上 BackupControlSettingsWindow.xaml 與 RoleManagementWindow.xaml 的 Page 編譯項；昨日新增的兩個視窗 xaml 雖在 repo 內，但因未列入 csproj，實際上 release build 不會被編入 → 此為隱性 build regression 修復，BackupControlSettings / RoleManagement 兩功能至此才「真的可用」</li>
-      <li><span class="changelog-tag ct-done">Done ↑</span> <strong>F02 StationSnapshotMapper 還原 xuan 的 power-flow 偵測（commit 7c3029a + 0f03d86）</strong>：StationSnapshotMapper.cs +92/-71 行重構 + 補回 12 行 StationViewModel binding assignments — 還原 xuan branch 上較完整的電力流向偵測邏輯（避免 merge 時被覆蓋成舊版本）</li>
-      <li><span class="changelog-tag ct-upd">更新</span> <strong>Merge 修補</strong>（commits 8b63ce6 + 06c5a21）：合併 origin/main 至 feature/ui-feedback-changes；OperationLogPanel.xaml.cs ±72 行衝突收斂；MainWindow.xaml +87/-? 行採用 xuan 版面；station_browser/static/station.js +1 行；csproj +2 行</li>
-      <li><span class="changelog-tag ct-upd">更新</span> <strong>MockData 大規模刷新 + HTTP timeout（commit 3679f36）</strong>：station-points.json +3014 行（站台點位 mock 大幅擴充以對齊 F05 階層 TreeView 所需的衍生點位群）；curve-menu.json -1452 行（移除冗餘節點）；station-history-query.json +387 行；HttpStationDataProvider timeout 微調；MainWindow.xaml ±6 行 layout 微調</li>
+      <li><span class="changelog-tag ct-done">Done ↑</span> <strong>F05 AnalysisDashboardPanel 大規模強化（commit deefa39）</strong>：xaml +383 行重排 / xaml.cs +1213 行重寫 — chart title 動態化、detail table 顯示修正、threshold 線繪製、CSV export 改善；後續再以 commit 1971876（xaml +44 / cs +190）補多項曲線/報表 UI 回饋、commit 86c16f4 加 1w/1mo interval + xma 支援（cloud/common/db.py +18 行）+ label rename + async warning 修；commit 37d3938 修 hover 空白區域顯示 '--' + 實際游標時間；commit 05594e2 修 CSV export 所有資料欄空白 bug</li>
+      <li><span class="changelog-tag ct-done">Done ↑</span> <strong>F08 SchedulePanel 484 行重整（commit 44125a1）</strong>：SchedulePanel.xaml 484 行收斂 / xaml.cs 268 行整理；ScheduleWindowViewModel 463 行精簡（去除冗餘 binding 與 mock 路徑），ScheduleCellViewModel +7 行；配套 MainWindow.xaml +26 行</li>
+      <li><span class="changelog-tag ct-done">Done ↑</span> <strong>F03 PowerFlow detection 還原（commits 7c3029a + 0f03d86 + 06c5a21）</strong>：StationSnapshotMapper 92 行還原 xuan 分支的電力流向判定邏輯；補回 StationViewModel 12 行遺漏 assignment；adopt xuan 衝突解決並修補 broken merge artifacts；PowerFlowDiagram.xaml 20 行 + BatteryModuleCard 78 行 / BatteryModuleOverviewCard 20+54 行 / BatteryStatusPanel 12+5 行配套 polish</li>
+      <li><span class="changelog-tag ct-done">Done ↑</span> <strong>Mock data 大規模擴充（commit 3679f36）</strong>：station-points.json +3014 行（站台點位 mock 完整化）/ curve-menu.json 重排 1452 行 / station-history-query.json 387 行更新；MainWindow.xaml +6 行 layout、HttpStationDataProvider timeout 微調；對應 F05 階層曲線選單與真實後端對齊</li>
+      <li><span class="changelog-tag ct-done">Done ↑</span> <strong>RegisterContextMenuService +195 行強化（commit 44125a1）</strong>：右鍵暫存器選單服務再擴充；AlarmStatusDialogService 124 行收斂、StatusGroupCard.xaml.cs +6 行配套</li>
+      <li><span class="changelog-tag ct-done">Done ↑</span> <strong>csproj build 修復（commit 25c34e0）</strong>：補 Page entries for BackupControlSettingsWindow + RoleManagementWindow（前日新增視窗漏登錄到 csproj，導致 build 漏 XAML resource）</li>
+      <li><span class="changelog-tag ct-upd">更新</span> <strong>後端 cloud/common/db.py（commit 86c16f4）</strong>：history 查詢加入 1w / 1mo interval + xma（exponential moving average）支援，對齊 F05 曲線頁長時段查詢需求</li>
       <li><span class="changelog-tag ct-confirm">仍 todo</span> <strong>F05</strong>：PNG 圖匯出、對數刻度顯示、AI 6 秒取樣（§4.4.4(6)(d)）仍未實作</li>
       <li><span class="changelog-tag ct-confirm">仍 todo</span> <strong>F06</strong>：alert_rules_worker L2/L3 引擎依 spec 計算仍待驗證</li>
       <li><span class="changelog-tag ct-confirm">仍 todo</span> <strong>§6.6 四等級密碼</strong>：角色 CRUD 已就緒，但「查詢/操作/遙控/管理」四級在程式碼路徑中的強制執行仍 todo；§6.6.2 連續 3 次錯誤閉鎖仍 todo</li>
       <li><span class="changelog-tag ct-confirm">仍 todo</span> <strong>F11 韌體升級流程</strong> 仍 todo</li>
-      <li><span class="changelog-tag ct-upd">資料</span> 燃盡圖 05-27：FE done 58 → 65 pts（新增 7 筆 done 任務：F05 圖表標題+明細+threshold+匯出骨架、F05 UI 回饋、F05 CSV 匯出 bug fix、F05 hover 空區域、F05 MockData 大刷新、F10 csproj 補 Page、F02 StationSnapshotMapper power-flow 還原）；FE total 152 → 159（範圍同步上升）；BE done 25 pts（持平，今日無後端變動）</li>
+      <li><span class="changelog-tag ct-upd">資料</span> 燃盡圖 05-27：FE done 58 → 60 pts（F05 AnalysisDashboardPanel 大規模強化 + 多項 UI 回饋 + CSV/hover bug 修 +1；F08 SchedulePanel 重整 + F03 PowerFlow detection 還原 + mock data 大規模擴充 +1）；BE done 25 → 26 pts（db.py 1w/1mo interval + xma 支援 +1）</li>
     </ul>
   </div>
 </div>
@@ -182,7 +184,7 @@ function downloadThisPage(){
 <div class="changelog closed" id="changelog-2026-05-26" style="border-color:#FCA5A5;background:#FEF2F2">
   <div class="changelog-hd" onclick="document.getElementById('changelog-2026-05-26').classList.toggle('closed')">
     <div class="changelog-hd-dot" style="background:#DC2626"></div>
-    <div class="changelog-title" style="color:#991B1B">歷史更新 — 2026-05-26（F02/F03/F04/F06 站台儀表板 + 告警面板 + 電池面板大幅精修 + RegisterContextMenuService 暫存器右鍵服務 + cloud db.py 200 行強化 + 站台目錄匯入腳本 + 雲端架構文件）</div>
+    <div class="changelog-title" style="color:#991B1B">歷史更新 — 2026-05-26（F02/F03/F04/F06 站台儀表板 + 告警面板 + 電池面板大幅精修 + RegisterContextMenuService + cloud db.py 200 行強化 + 站台目錄匯入腳本 + 雲端架構文件）</div>
     <div class="changelog-commits">
       <span class="changelog-commit" style="background:#FECACA;color:#991B1B">4ad8519 alarm+dashboard workflows</span>
     </div>
@@ -190,18 +192,16 @@ function downloadThisPage(){
   </div>
   <div class="changelog-body" style="border-top-color:#FCA5A5">
     <ul class="changelog-ul">
-      <li><span class="changelog-tag ct-done">Done ↑</span> <strong>F02 StationOverviewPanel 大幅重整（commit 4ad8519）</strong>：StationOverviewPanel.xaml +341/-? 行 / xaml.cs +147 行；PowerFlowDiagram +30 / TransferEfficiencyCard / StationInfoCard 連動；StationViewModel.cs +24 binding 補齊</li>
-      <li><span class="changelog-tag ct-done">Done ↑</span> <strong>F04 BatteryStatusPanel + BatteryStatusSection 大幅強化（commit 4ad8519）</strong>：BatteryStatusPanel.xaml +189 / xaml.cs +119；BatteryStatusSection.xaml +57 / 新增 xaml.cs +37；BatteryStatusWindowViewModel +23</li>
-      <li><span class="changelog-tag ct-done">Done ↑</span> <strong>F03 InverterDashboardPanel 強化（commit 4ad8519）</strong>：xaml +124 / xaml.cs +89 — 整合 PowerFlowDiagram 與右鍵 register 操作</li>
-      <li><span class="changelog-tag ct-done">Done ↑</span> <strong>F06 AlarmLogPanel + AlarmSettingsWindow 收斂</strong>：AlarmLogPanel.xaml +93 / xaml.cs +77；AlarmSettingsWindow.xaml +12 / xaml.cs +123</li>
-      <li><span class="changelog-tag ct-done">Done ↑</span> <strong>G02 RegisterContextMenuService 新增（commit 4ad8519）</strong>：Helpers/RegisterContextMenuService.cs 324 行 — 集中管理暫存器位址右鍵選單，多面板共用</li>
-      <li><span class="changelog-tag ct-done">Done ↑</span> <strong>後端 cloud/common/db.py +200 行強化 + 站台目錄匯入腳本（import_completed_station_directory.py 212 行）+ 雲端架構文件 cloud_architecture_summary_zh.md 299 行 + alarm-rules-usage.zh-TW.md 261 行 + power-flow-line-rules.zh-TW.md 120 行</strong></li>
-      <li><span class="changelog-tag ct-done">Done ↑</span> <strong>F01 / station_browser 強化</strong>：app.py +60 / app.css +153 / index.js +283 / station.js +217</li>
+      <li><span class="changelog-tag ct-done">Done ↑</span> <strong>F02 StationOverviewPanel 大幅重整（commit 4ad8519）</strong>：xaml +341 行 / xaml.cs +147 行，PowerFlowDiagram +30、TransferEfficiencyCard、StationInfoCard 整體連動；StationViewModel +24 行</li>
+      <li><span class="changelog-tag ct-done">Done ↑</span> <strong>F04 BatteryStatusPanel + BatteryStatusSection 強化（commit 4ad8519）</strong>：BatteryStatusPanel.xaml +189 / xaml.cs +119；BatteryStatusSection xaml +57 / xaml.cs +37（升級為帶 code-behind）；BatteryStatusWindowViewModel +23</li>
+      <li><span class="changelog-tag ct-done">Done ↑</span> <strong>F03 InverterDashboardPanel 強化（commit 4ad8519）</strong>：xaml +124 / xaml.cs +89，整合 PowerFlowDiagram 更新與右鍵 register 操作</li>
+      <li><span class="changelog-tag ct-done">Done ↑</span> <strong>F06 AlarmLogPanel + AlarmSettingsWindow 收斂（commit 4ad8519）</strong>：AlarmLogPanel.xaml +93 / xaml.cs +77；AlarmSettingsWindow.xaml.cs +123 第三次小幅修補</li>
+      <li><span class="changelog-tag ct-done">Done ↑</span> <strong>RegisterContextMenuService 新增（commit 4ad8519）</strong>：Helpers/RegisterContextMenuService.cs 324 行，集中管理暫存器右鍵選單，多面板共用</li>
+      <li><span class="changelog-tag ct-done">Done ↑</span> <strong>後端 cloud/common/db.py +200 行強化 + 站台目錄匯入腳本 + 雲端架構文件（commit 4ad8519）</strong>：import_completed_station_directory.py 212 行；docs/cloud_architecture_summary_zh.md 299 / alarm-rules-usage 261 / power-flow-line-rules 120 行</li>
       <li><span class="changelog-tag ct-upd">資料</span> 燃盡圖 05-26：FE done 57 → 58 pts；BE done 24 → 25 pts</li>
     </ul>
   </div>
 </div>
-
 
 <div id="main-pane" class="main-pane"></div>
 
@@ -240,12 +240,12 @@ const BURNDOWN = {
     ['2026-05-22', null], // F05 階層 TreeView + F08 排程 4 模板（44f2fd5 xuan）+ F06 AcknowledgeAlarm dialog + F07 ops log polish
     ['2026-05-25', null], // F10 角色管理 CRUD + AlarmSettings 重寫 + BackupControlSettings 新視窗 + F05 Path B 收斂 + 23 筆 UI 回饋
     ['2026-05-26', null], // 4ad8519：StationOverview/Battery/Inverter/AlarmLog/AlarmSettings 大幅精修 + RegisterContextMenuService 共用服務
-    ['2026-05-27', null], // deefa39/1971876/05594e2/37d3938：F05 AnalysisDashboard chart title/detail/threshold/CSV/hover；25c34e0 csproj 修補；3679f36 mock+timeout；merge fixes
+    ['2026-05-27', null], // deefa39/1971876/3679f36/44125a1/86c16f4 等：F05 AnalysisDashboardPanel 大規模強化 + F08 SchedulePanel 484 行重整 + F03 power flow detection 還原 + mock data +3548 行 + csproj build 修
   ],
   // 累積完成 pts（與 fe[] 對齊）
-  fe_done_at:  [0,   4,   11,  16,  16,  28,  34,  42,  43,  50,  57,  58,  65],
+  fe_done_at:  [0,   4,   11,  16,  16,  28,  34,  42,  43,  50,  57,  58,  60],
   // 該日期當下 FE 總範圍（估計：含已知任務新增；今日 = countTasks 實算）
-  fe_total_at: [122, 122, 125, 128, 130, 137, 143, 146, 146, 149, 152, 152, 159],
+  fe_total_at: [122, 122, 125, 128, 130, 137, 143, 146, 146, 149, 152, 152, 154],
 
   be: [
     ['2026-05-01', null], // 預備期已完成 3 pts
@@ -257,10 +257,10 @@ const BURNDOWN = {
     ['2026-05-22', null], // 836fb08 衍生點 + 44f2fd5 station_schedule_template CRUD + runtime hardening
     ['2026-05-25', null], // 64a4772 role management CRUD + ca81979 apply_station_alarm_rules + station_browser 強化
     ['2026-05-26', null], // 4ad8519：cloud/common/db.py +200 行強化 + import_completed_station_directory 腳本 + cloud_architecture_summary 文件
-    ['2026-05-27', null], // 持平資料點（今日無後端變動，全為 WPF + csproj + merge fix）
+    ['2026-05-27', null], // 86c16f4：cloud/common/db.py history 查詢加入 1w / 1mo interval + xma（exponential moving average）支援
   ],
-  be_done_at:  [3,  7,  11, 14, 18, 18, 22, 24, 25, 25],
-  be_total_at: [13, 15, 17, 19, 22, 22, 26, 27, 27, 27],
+  be_done_at:  [3,  7,  11, 14, 18, 18, 22, 24, 25, 26],
+  be_total_at: [13, 15, 17, 19, 22, 22, 26, 27, 27, 28],
 
   // 範圍新增事件（用於圖上 annotation）
   scope_events: [
@@ -271,7 +271,7 @@ const BURNDOWN = {
     { date:'2026-05-22', delta_fe:+3, delta_be:+4, note:'836fb08 衍生點 + 44f2fd5 station_schedule_template 4 模板 + AcknowledgeAlarm dialog + runtime hardening' },
     { date:'2026-05-25', delta_fe:+3, delta_be:+1, note:'64a4772 role management CRUD + ca81979 AlarmSettings 重寫 + BackupControlSettings 新視窗 + 23 筆 UI feedback' },
     { date:'2026-05-26', delta_fe:0,  delta_be:0,  note:'4ad8519 站台儀表板/告警/電池/逆變器面板大規模精修 + RegisterContextMenuService 共用服務（純精修，未新增任務範圍）' },
-    { date:'2026-05-27', delta_fe:0,  delta_be:0,  note:'F05 AnalysisDashboard chart title/detail/threshold/CSV/hover 大幅強化 + csproj 補 Page 修隱性 build regression + StationSnapshotMapper 還原 xuan power-flow + MockData 大規模刷新（純精修+regression fix，未新增任務範圍）' },
+    { date:'2026-05-27', delta_fe:0,  delta_be:0,  note:'F05 AnalysisDashboardPanel 大規模強化（chart title/detail table/threshold/CSV/hover）+ F08 SchedulePanel 484 行重整 + F03 power flow detection 還原 + mock data +3548 行 + db.py 1w/1mo/xma + csproj build 修（純精修，未新增任務範圍）' },
   ],
 };
 
@@ -366,8 +366,7 @@ const EPICS = [
   /* ═══ E2: 即時監控總覽 ══════════════════════════════════ */
   { id:'E2', name:'即時監控總覽', color:'#8B5CF6', sub:'F02 · G02 · G03', layer:'fe', cards:[
 
-    { id:'F02', name:'站台運行總覽', pct:73, be_deps:['overview-data'], tasks:[
-      { s:'done', t:'StationSnapshotMapper power-flow 偵測還原 xuan branch 版本（commit 7c3029a +92/-71 + commit 0f03d86 +12 行 StationViewModel binding assignments）：避免 merge origin/main 時 power-flow 邏輯被覆蓋成舊版本', src:['F02','commit 7c3029a','commit 0f03d86'] },
+    { id:'F02', name:'站台運行總覽', pct:72, be_deps:['overview-data'], tasks:[
       { s:'done', t:'StationOverviewPanel +655 行（692319a +302, fff9c06 +353）：站台總覽資料 binding 與互動大幅補齊；PowerFlowDiagram / BatteryStatusPanel / QuickActionPanel / StationInfoCard 整批 polish', src:['F02','commit 692319a','commit fff9c06'] },
       { s:'done', t:'LoadingOverlayService 整合：MainWindow 含全域 loading 狀態管理（計數器 + lock），統一各 Panel 載入體驗', src:['F02','commit 692319a'] },
       { s:'done',  t:'PowerFlowDiagram、BatteryStatusSection、StationInfoCard 嵌入；子 Panel Visibility 切換；3 秒輪詢', src:['F02'] },
@@ -464,12 +463,9 @@ const EPICS = [
   /* ═══ E4: 資料分析 ══════════════════════════════════════ */
   { id:'E4', name:'資料分析', color:'#F59E0B', sub:'F05（標 F11）曲線資料', layer:'fe', cards:[
 
-    { id:'F05', name:'曲線資料（標 F11）', pct:98, be_deps:['history-data','ai-sampling'], tasks:[
-      { s:'done', t:'AnalysisDashboardPanel 圖表標題 + 明細表 + threshold 顯示 + 匯出/列印骨架（commit deefa39）：xaml.cs +1213 行 / xaml +383 行 — 圖表標題完整顯示 metric+單位；RebuildDetailTable 多項修正；threshold 線條顯示；PrintCommand / SaveImageCommand 整體骨架補齊', src:['F05','commit deefa39'] },
-      { s:'done', t:'F05 多項 UI 回饋（commit 1971876）：xaml.cs +190 / xaml +44 — hover / tooltip / metric switch 樣式細節對齊', src:['F05','commit 1971876'] },
-      { s:'done', t:'CSV 匯出空欄位 bug fix（commit 05594e2）：所有資料欄位皆為空的 regression 修正，匯出功能恢復可用', src:['F05','commit 05594e2'] },
-      { s:'done', t:'hover 空區域顯示「--」與實際游標時間（commit 37d3938）：UX 對齊驗收', src:['F05','commit 37d3938'] },
-      { s:'done', t:'MockData 大規模刷新（commit 3679f36）：station-points.json +3014 / curve-menu.json -1452 / station-history-query.json +387；對齊 F05 階層 TreeView 所需的衍生點位群', src:['F05','commit 3679f36'] },
+    { id:'F05', name:'曲線資料（標 F11）', pct:97, be_deps:['history-data','ai-sampling'], tasks:[
+      { s:'done', t:'AnalysisDashboardPanel 大規模強化（commit deefa39）：xaml +383 / xaml.cs +1213 — chart title 動態化、detail table 顯示修正、threshold 線繪製、CSV export 改善；commit 1971876 補多項曲線/報表 UI 回饋；commit 86c16f4 加 label rename + async warning 修；commit 37d3938 修 hover 空白區域 \'--\' + 實際游標時間；commit 05594e2 修 CSV export 所有資料欄空白 bug', src:['F05','commit deefa39','commit 1971876','commit 37d3938','commit 05594e2','commit 86c16f4'] },
+      { s:'done', t:'Mock data 與後端對齊（commit 3679f36）：MockData/station-points.json +3014 行（站台點位 mock 完整化）/ curve-menu.json 重排 -1452 行 / station-history-query.json 387 行更新；對應 F05 階層曲線選單與真實後端對齊', src:['F05','commit 3679f36'] },
       { s:'done', t:'Path B 曲線版面收斂（commits a00dac6 + b5778bf + 41b29c3 + 6a8c7a2 + bfe63ee + 974b31d）：動態填色 + 緊湊控件 + 合併標題列；範圍選擇器 / 導航按鈕收進 chart card；指標 card 併入頂列；移除 rolling24/custom range cards、預設窗口擴大為 3h；返回按鈕統一「站台首頁」', src:['F05','commit a00dac6'] },
       { s:'done', t:'curve-menu virtual_leaf + drill-down hierarchy + 多序列疊圖 bug 修；MockData/curve-menu.json 重構 -1123 行；AnalysisDashboardPanel.xaml.cs +53 行 / CurveMenuNodeViewModel +3 行', src:['F05','commit ace7e12'] },
       { s:'done', t:'階層 TreeView 曲線選單（取代平面 source/module 按鈕）：MockData/curve-menu.json（2868 行）+ CurveMenuNodeViewModel + 葉節點點選觸發歷史查詢；AnalysisDashboardPanel.xaml 重寫 +161 行 / xaml.cs +144 行', src:['F05','commit f3baecd'] },
@@ -543,8 +539,7 @@ const EPICS = [
       { s:'todo',  q:true, t:'確認必填欄位、執行權限（管理員？）、新增流程（dialog vs 獨立頁面）、批次匯入 CSV 需求', src:['F09'] },
     ]},
 
-    { id:'F10', name:'系統設定', pct:96, be_deps:['sys-settings','auth'], tasks:[
-      { s:'done', t:'csproj 補上 BackupControlSettingsWindow + RoleManagementWindow Page 編譯項（commit 25c34e0）：兩個視窗 xaml 雖已寫入但因 csproj 未列入而 release build 不會編入；本次修正為隱性 build regression fix，兩功能至此才實際可用', src:['F10','commit 25c34e0'] },
+    { id:'F10', name:'系統設定', pct:95, be_deps:['sys-settings','auth'], tasks:[
       { s:'done', t:'RoleManagementWindow（166 + 220 行）：admin 維護角色清單；DB schema +17 / API +93 / db.py +410 角色 CRUD helpers；StationApiDtos +54 / IStationDataProvider +20 / Http +64 / Mock +217；§6.6 四等級資料表已可擴充（程式碼路徑強制執行仍 todo）', src:['F10','§6.6','commit 64a4772'] },
       { s:'done', t:'BackupControlSettingsWindow（164 + 263 行）：備援充電起點/終點/放電終點 獨立設定視窗（從 BatteryStatusPanel 快速設定區獨立出來）', src:['F10','commit ca81979'] },
       { s:'done', t:'AlarmSettingsWindow 二次重寫（+670 行 cs / +73 行 xaml）：對齊新的 alarm rule 規則庫格式 + 批次套用流程 + 欄位驗證細部補強；配套 apply_station_alarm_rules_to_all_stations.py（275 行）一次套用到所有站台', src:['F10','commit ca81979'] },
@@ -589,7 +584,8 @@ const EPICS = [
   /* ═══ E0: 雲端後端基礎 ══════════════════════════════════ */
   { id:'E0', name:'雲端後端基礎', color:'#0EA5E9', sub:'Cloud pipeline · API · Protocol · 認證', layer:'be', cards:[
 
-    { id:'CLOUD', name:'後端 API 與協議連結', pct:90, tasks:[
+    { id:'CLOUD', name:'後端 API 與協議連結', pct:91, tasks:[
+      { s:'done', t:'歷史/曲線查詢加入 1w / 1mo interval + xma（exponential moving average）支援（cloud/common/db.py +18 行）：對齊 F05 曲線頁長時段查詢需求', fe_wt:['F05 曲線資料頁 長時段 + 移動平均'], src:['E0','commit 86c16f4'] },
       { s:'done', t:'角色管理 CRUD（cloud/db/cloud_schema_v1.sql +17 行擴充角色資料表 + cloud/services/api/main.py +93 行 endpoint + cloud/common/db.py +410 行 helpers）：§6.6 四等級的「資料表層」就緒，等程式碼路徑強制執行', fe_wt:['F10 RoleManagementWindow','§6.6 四等級密碼'], sp:['§6.6'], src:['E0','commit 64a4772'] },
       { s:'done', t:'apply_station_alarm_rules_to_all_stations.py（275 行）批次將 alarm spec 套用到所有站台；同 ca81979 含 db.py +261 行 + API 配套（station alarm rule helpers）', fe_wt:['F10 AlarmSettingsWindow'], src:['E0','commit ca81979'] },
       { s:'done', t:'station_browser 強化（station.js +57 行 + station_detail.html +19 行）：Flask 端站台電池檢視 + alarm rule export 功能（運維輔助工具）', src:['E0','commit 9e47627'] },
