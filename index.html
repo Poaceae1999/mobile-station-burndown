@@ -176,7 +176,8 @@ function downloadThisPage(){
       <li><span class="changelog-tag ct-confirm">仍 todo</span> <strong>F06</strong>：alert_rules_worker L2/L3 引擎依 spec 計算仍待驗證</li>
       <li><span class="changelog-tag ct-confirm">仍 todo</span> <strong>§6.6 四等級密碼</strong>：角色 CRUD 已就緒，但「查詢/操作/遙控/管理」四級在程式碼路徑中的強制執行仍 todo；§6.6.2 連續 3 次錯誤閉鎖仍 todo</li>
       <li><span class="changelog-tag ct-confirm">仍 todo</span> <strong>F11 韌體升級流程</strong> 仍 todo</li>
-      <li><span class="changelog-tag ct-upd">資料</span> 燃盡圖 05-27：FE done 58 → 60 pts（F05 AnalysisDashboardPanel 大規模強化 + 多項 UI 回饋 + CSV/hover bug 修 +1；F08 SchedulePanel 重整 + F03 PowerFlow detection 還原 + mock data 大規模擴充 +1）；BE done 25 → 26 pts（db.py 1w/1mo interval + xma 支援 +1）</li>
+      <li><span class="changelog-tag ct-done">Done ↑</span> <strong>F05 PNG 圖匯出 + 多條線疊加 — 補認列已實作功能</strong>：審查確認 ExportImageButton_Click（AnalysisDashboardPanel.xaml.cs:689）+ ExportElementToPng（:3443，PngBitmapEncoder）；IsMultiSeriesMode（:1856）+ _selectedCatalogPointCodes 多選 + _seriesColorByKey palette + CollectAvailableLeaves 群組節點遞迴蒐集；對數刻度仍 todo（無相關實作）</li>
+      <li><span class="changelog-tag ct-upd">資料</span> 燃盡圖 05-27：FE done 58 → 62 pts（F05 AnalysisDashboardPanel 大規模強化 +1；mock data 對齊 +1；補認列 PNG 匯出 + 多條線疊加 +2）；BE done 25 → 26 pts（db.py 1w/1mo interval + xma 支援 +1）</li>
     </ul>
   </div>
 </div>
@@ -243,9 +244,9 @@ const BURNDOWN = {
     ['2026-05-27', null], // deefa39/1971876/3679f36/44125a1/86c16f4 等：F05 AnalysisDashboardPanel 大規模強化 + F08 SchedulePanel 484 行重整 + F03 power flow detection 還原 + mock data +3548 行 + csproj build 修
   ],
   // 累積完成 pts（與 fe[] 對齊）
-  fe_done_at:  [0,   4,   11,  16,  16,  28,  34,  42,  43,  50,  57,  58,  60],
+  fe_done_at:  [0,   4,   11,  16,  16,  28,  34,  42,  43,  50,  57,  58,  62],
   // 該日期當下 FE 總範圍（估計：含已知任務新增；今日 = countTasks 實算）
-  fe_total_at: [122, 122, 125, 128, 130, 137, 143, 146, 146, 149, 152, 152, 154],
+  fe_total_at: [122, 122, 125, 128, 130, 137, 143, 146, 146, 149, 152, 152, 155],
 
   be: [
     ['2026-05-01', null], // 預備期已完成 3 pts
@@ -481,8 +482,9 @@ const EPICS = [
       { s:'done',  t:'CSV 匯出（history-report 標籤）', src:['F05','commit 0a411af'] },
       { s:'done',  t:'curve-report-development-spec.zh-TW.md 規格文件（575 行）', src:['F05','commit 0a411af'] },
       { s:'done', t:'WPF point-group 多選查詢控制項（TreeView 群組節點即達成多序列選取；後端 pointGroupCodes 展開已就緒）', src:['F05','commit a28e6f8','commit 0a411af'] },
-      { s:'todo',  p:'P2', t:'PNG 圖匯出 / 對數刻度顯示', src:['F05','commit 0a411af'] },
-      { s:'todo',  q:true, t:'多條線疊加對比功能（確認需求後實作）', src:['F05'] },
+      { s:'done', t:'PNG 圖匯出（ExportImageButton + ExportElementToPng，PngBitmapEncoder；SaveFileDialog "PNG 圖片 (*.png)"）', src:['F05','AnalysisDashboardPanel.xaml.cs:689','xaml.cs:3443'] },
+      { s:'done', t:'多條線疊加對比（IsMultiSeriesMode + _selectedCatalogPointCodes 多選 + _seriesColorByKey palette，CollectAvailableLeaves 群組節點遞迴蒐集）', src:['F05','xaml.cs:1856','commit a28e6f8'] },
+      { s:'todo',  p:'P2', t:'對數刻度顯示（Y 軸 log scale，目前 AnalysisDashboardPanel 無相關實作）', src:['F05'] },
     ]},
   ]},
 
