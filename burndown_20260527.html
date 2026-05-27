@@ -178,6 +178,7 @@ function downloadThisPage(){
       <li><span class="changelog-tag ct-confirm">仍 todo</span> <strong>F11 韌體升級流程</strong> 仍 todo</li>
       <li><span class="changelog-tag ct-done">Done ↑</span> <strong>系統性 audit：補認列 20 項 todo 為 done（過去多日累積但未及時翻牌）</strong>。F02：2×4 nav 順序（QuickActionPanel.xaml:61）、紅色橫幅移至 G02（MainWindow.xaml:85）、預設首頁=運行總覽（MainWindow.xaml.cs:861）、滾動條修復（StationOverviewPanel.xaml.cs:152）。F01：24 欄多站台表格（StationOverviewPanel.xaml:265）、三欄凍結、UI 權限控制（AdminActionVisibility）、市電狀態 0x1F0、停電次數 0x208、設備通訊狀態、電池三連燈 0x00/0x50/0xA0、電力轉移效率欄位（StationOverviewPanel.xaml.cs:823-832）。F03：「逆變器過電故障」錯字修正（InverterDashboardViewModel.cs:176）。F04：右鍵選單（RegisterContextMenuService）、SOC/SOH/溫度整數格式（BatteryModuleViewModel.cs:107-138）。G01：樹狀節點告警顏色（MarkerForeground 依 OnlineStatusCode）、搜尋站台篩選（LeftNavigationPanel.xaml.cs:73）。G02：紅色橫幅獨立常駐告警區（TopNavigationBar.xaml:14）、四等級告警視覺狀態機 todo → doing 60%（全局閃爍已實作）。G03：返回按鈕統一「站台首頁」。F08：多站台套用支援。SPEC：§6.1.2(2) 匯流排顏色動態變化（PowerFlowDiagram.xaml:47 {Binding *FlowBrush}）</li>
       <li><span class="changelog-tag ct-confirm">仍 todo</span> <strong>後續待補</strong>：F02 右鍵 ContextMenu NavigateToMessages、PowerFlowDiagram 縮放、AC Input register 修正、PV÷1000；F03 PrintCommand / SaveImage / 兩級告警閃爍 / 「有/無」狀態文字；F04 G5 載入失敗 Modal / G4 告警閃爍 / G7 SaveImage / G8 MVVM 重構 / 模組標籤 / 模組狀態文字；G01 新增站台後即時更新；F01 災害調度勾選+下發 / DispatchPhase / 排序 / HasError；G02 緊急自動跳頁 / 聲音告警；G03 深色模式 / 返回電池狀態按鈕；F06/F07 匯出；F08 衝突處理；F09 ValidateCommand；F10 版本控管 / Tooltip；SPEC §6.1.2(1) 動態動畫 / §6.6 四等級強制 / §6.6.2 連續 3 次閉鎖</li>
+      <li><span class="changelog-tag ct-done">勘誤</span> <strong>燃盡資料點歷史重分配（git blame 還原實際完成日）</strong>：先前 audit 補認的 28 項已 done 但誤標 todo 的工作，依 commit 日期重新分配至各歷史資料點，不再全部堆積在 05-27。新 fe_done_at = [0, 4, 12, 20, 26, 42, 54, 63, 65, 73, 82, 86, 88]。05-06+1（G01 樹狀告警顏色 05-05）／05-09+3（F01 設備通訊、F03 大標中文、F08 多站台 05-07）／05-12+6（F02 2×4 nav、F01 24欄+三欄凍結+市電+停電次數+電力轉移 05-11-13）／05-18+4（F02 預設首頁、F01 電池三連燈、SPEC 匯流排顏色、F05 PNG 匯出 05-14-18）／05-19+6（F03 錯字、F04 SOC/SOH/溫度整數+模組標籤+模組狀態 0x02/0x03、F05 多序列 全 05-19 fff9c06）／05-20+1（G02 紅色橫幅獨立 692319a）／05-21+1（F04 溫度/均衡位址 f3baecd）／05-22+1（G01 搜尋篩選 44f2fd5）／05-25+2（F02 紅色橫幅移位 ca81979、G03 返回按鈕 974b31d）／05-26+3（F02 滾動條、F01 UI 權限、F04 G6 右鍵 全 4ad8519）</li>
       <li><span class="changelog-tag ct-upd">資料</span> 燃盡圖 05-27：FE done 58 → 88 pts（今日 +3：F05 大規模強化、mock data 對齊、F05 PNG/多序列補認；audit 補認 20 項：F02×4、F01×8、F03×1、F04×3、G01×2、G02×1、G03×1、F08×1、SPEC×1，加 doing→done 2 項 = 22；其中 1 項 todo→doing）；BE done 25 → 26 pts（db.py 1w/1mo + xma +1）</li>
     </ul>
   </div>
@@ -245,7 +246,7 @@ const BURNDOWN = {
     ['2026-05-27', null], // deefa39/1971876/3679f36/44125a1/86c16f4 等：F05 AnalysisDashboardPanel 大規模強化 + F08 SchedulePanel 484 行重整 + F03 power flow detection 還原 + mock data +3548 行 + csproj build 修
   ],
   // 累積完成 pts（與 fe[] 對齊）
-  fe_done_at:  [0,   4,   11,  16,  16,  28,  34,  42,  43,  50,  57,  58,  88],
+  fe_done_at:  [0,   4,   12,  20,  26,  42,  54,  63,  65,  73,  82,  86,  88],
   // 該日期當下 FE 總範圍（估計：含已知任務新增；今日 = countTasks 實算）
   fe_total_at: [122, 122, 125, 128, 130, 137, 143, 146, 146, 149, 152, 152, 155],
 
