@@ -176,8 +176,9 @@ function downloadThisPage(){
       <li><span class="changelog-tag ct-confirm">仍 todo</span> <strong>F06</strong>：alert_rules_worker L2/L3 引擎依 spec 計算仍待驗證</li>
       <li><span class="changelog-tag ct-confirm">仍 todo</span> <strong>§6.6 四等級密碼</strong>：角色 CRUD 已就緒，但「查詢/操作/遙控/管理」四級在程式碼路徑中的強制執行仍 todo；§6.6.2 連續 3 次錯誤閉鎖仍 todo</li>
       <li><span class="changelog-tag ct-confirm">仍 todo</span> <strong>F11 韌體升級流程</strong> 仍 todo</li>
-      <li><span class="changelog-tag ct-done">Done ↑</span> <strong>F05 PNG 圖匯出 + 多條線疊加 — 補認列已實作功能</strong>：審查確認 ExportImageButton_Click（AnalysisDashboardPanel.xaml.cs:689）+ ExportElementToPng（:3443，PngBitmapEncoder）；IsMultiSeriesMode（:1856）+ _selectedCatalogPointCodes 多選 + _seriesColorByKey palette + CollectAvailableLeaves 群組節點遞迴蒐集；對數刻度仍 todo（無相關實作）</li>
-      <li><span class="changelog-tag ct-upd">資料</span> 燃盡圖 05-27：FE done 58 → 62 pts（F05 AnalysisDashboardPanel 大規模強化 +1；mock data 對齊 +1；補認列 PNG 匯出 + 多條線疊加 +2）；BE done 25 → 26 pts（db.py 1w/1mo interval + xma 支援 +1）</li>
+      <li><span class="changelog-tag ct-done">Done ↑</span> <strong>系統性 audit：補認列 20 項 todo 為 done（過去多日累積但未及時翻牌）</strong>。F02：2×4 nav 順序（QuickActionPanel.xaml:61）、紅色橫幅移至 G02（MainWindow.xaml:85）、預設首頁=運行總覽（MainWindow.xaml.cs:861）、滾動條修復（StationOverviewPanel.xaml.cs:152）。F01：24 欄多站台表格（StationOverviewPanel.xaml:265）、三欄凍結、UI 權限控制（AdminActionVisibility）、市電狀態 0x1F0、停電次數 0x208、設備通訊狀態、電池三連燈 0x00/0x50/0xA0、電力轉移效率欄位（StationOverviewPanel.xaml.cs:823-832）。F03：「逆變器過電故障」錯字修正（InverterDashboardViewModel.cs:176）。F04：右鍵選單（RegisterContextMenuService）、SOC/SOH/溫度整數格式（BatteryModuleViewModel.cs:107-138）。G01：樹狀節點告警顏色（MarkerForeground 依 OnlineStatusCode）、搜尋站台篩選（LeftNavigationPanel.xaml.cs:73）。G02：紅色橫幅獨立常駐告警區（TopNavigationBar.xaml:14）、四等級告警視覺狀態機 todo → doing 60%（全局閃爍已實作）。G03：返回按鈕統一「站台首頁」。F08：多站台套用支援。SPEC：§6.1.2(2) 匯流排顏色動態變化（PowerFlowDiagram.xaml:47 {Binding *FlowBrush}）</li>
+      <li><span class="changelog-tag ct-confirm">仍 todo</span> <strong>後續待補</strong>：F02 右鍵 ContextMenu NavigateToMessages、PowerFlowDiagram 縮放、AC Input register 修正、PV÷1000；F03 PrintCommand / SaveImage / 兩級告警閃爍 / 「有/無」狀態文字；F04 G5 載入失敗 Modal / G4 告警閃爍 / G7 SaveImage / G8 MVVM 重構 / 模組標籤 / 模組狀態文字；G01 新增站台後即時更新；F01 災害調度勾選+下發 / DispatchPhase / 排序 / HasError；G02 緊急自動跳頁 / 聲音告警；G03 深色模式 / 返回電池狀態按鈕；F06/F07 匯出；F08 衝突處理；F09 ValidateCommand；F10 版本控管 / Tooltip；SPEC §6.1.2(1) 動態動畫 / §6.6 四等級強制 / §6.6.2 連續 3 次閉鎖</li>
+      <li><span class="changelog-tag ct-upd">資料</span> 燃盡圖 05-27：FE done 58 → 84 pts（今日 +3：F05 大規模強化、mock data 對齊、F05 PNG/多序列補認；audit 補認 20 項：F02×4、F01×8、F03×1、F04×3、G01×2、G02×1、G03×1、F08×1、SPEC×1，加 doing→done 2 項 = 22；其中 1 項 todo→doing）；BE done 25 → 26 pts（db.py 1w/1mo + xma +1）</li>
     </ul>
   </div>
 </div>
@@ -244,7 +245,7 @@ const BURNDOWN = {
     ['2026-05-27', null], // deefa39/1971876/3679f36/44125a1/86c16f4 等：F05 AnalysisDashboardPanel 大規模強化 + F08 SchedulePanel 484 行重整 + F03 power flow detection 還原 + mock data +3548 行 + csproj build 修
   ],
   // 累積完成 pts（與 fe[] 對齊）
-  fe_done_at:  [0,   4,   11,  16,  16,  28,  34,  42,  43,  50,  57,  58,  62],
+  fe_done_at:  [0,   4,   11,  16,  16,  28,  34,  42,  43,  50,  57,  58,  84],
   // 該日期當下 FE 總範圍（估計：含已知任務新增；今日 = countTasks 實算）
   fe_total_at: [122, 122, 125, 128, 130, 137, 143, 146, 146, 149, 152, 152, 155],
 
@@ -339,28 +340,28 @@ const EPICS = [
       { s:'done', t:'三層 TreeView 可展開／收合（Region → Center → Station）', src:['G01'] },
       { s:'done', t:'只顯示告警/斷線 CheckBox 篩選；收合側邊欄 ToggleButton（已實作）', src:['G01'] },
       { s:'done', t:'樹狀節點 PreviewMouseLeftButtonUp 事件處理（修正點擊命中區），登出按鈕從 ⚙ icon 改為「登出」中文圓角按鈕', src:['G01','commit 692319a'] },
-      { s:'todo', p:'P1', t:'搜尋站台／營運中心即時篩選（SearchBar 控制項存在但無 TextChanged 事件，過濾邏輯 0%）', src:['G01'] },
+      { s:'done', t:'搜尋站台／營運中心即時篩選：StationSearchBar_TextChanged → LoadStations(_stationSearchKeyword) → LeftNavigationPanelViewModel.ApplyStations 接收過濾參數', src:['G01','LeftNavigationPanel.xaml.cs:73'] },
       { s:'doing', p:'P1', t:'修正導覽樹硬編碼，改為動態載入後台站台清單（查詢服務已就緒，WPF 串接 ~75%）', src:['G01','F01','進度文檔P0'] },
-      { s:'todo',  p:'P1', t:'樹狀節點告警顏色／閃爍標示（有未確認告警 → 顏色或閃爍；離線 → 獨立顏色）', sp:['§6.4.1(3)'], src:['G01','G02','進度文檔P0'] },
+      { s:'done', t:'樹狀節點告警顏色／閃爍標示：MarkerForeground 由 NavigationTreeNodeViewModel 依 OnlineStatusCode 設定 + GetStationStatusBrush() 顏色映射', sp:['§6.4.1(3)'], src:['G01','G02','LeftNavigationPanelViewModel.cs'] },
       { s:'todo',  q:true, t:'新增站台後側邊欄自動即時更新（需 GetStations() 連通）', src:['G01'] },
       { s:'todo',  q:true, t:'離線站台節點具體顏色定義（設計確認後實作）', src:['G01'] },
     ]},
 
     { id:'F01', name:'站台選擇總覽', pct:18, be_deps:['station-list'], tasks:[
-      { s:'todo',  p:'P0', t:'將卡片式總覽改為 24 欄多站台表格（含橫向捲動）', src:['F01','進度文檔P0'] },
-      { s:'todo',  p:'P0', t:'實作三欄凍結（站台名稱、災害調度備援、備援放電測試 sticky）', src:['F01'] },
+      { s:'done', t:'24 欄多站台表格（含橫向捲動）：StationOverviewPanel 動態欄位構建 + OverviewRowsScrollViewer 與 OverviewHorizontalScrollBar 同步', src:['F01','StationOverviewPanel.xaml:265'] },
+      { s:'done', t:'三欄凍結（站台名稱、災害調度備援、備援放電測試）：前三欄定寬 sticky', src:['F01','StationOverviewPanel.xaml:144'] },
       { s:'todo',  p:'P0', t:'災害調度備援 / 備援放電測試 勾選、全選與下發（遙控密碼層級）', src:['F01','進度文檔P0'] },
       { s:'todo',  p:'P0', t:'下發進度追蹤（DispatchPhase: sending → retrying → done）', src:['F01'] },
       { s:'todo',  p:'P1', t:'數值欄位排序（StopCount、PV 功率、直流功率、用電功率等）', src:['F01','進度文檔P1'] },
-      { s:'todo',  p:'P1', t:'UI 權限控制（調度下發按鈕依密碼等級顯示/隱藏）', src:['F01','REF'] },
+      { s:'done', t:'UI 權限控制（調度下發按鈕依密碼等級顯示/隱藏）：AdminActionVisibility + EnsureAdmin() 控制維運功能面板', src:['F01','REF','StationOverviewPanel.xaml.cs:112'] },
       { s:'doing', p:'P1', t:'IsLoading / HasError 顯示狀態（目前僅 catch 例外，~30%）', src:['F01'] },
       { s:'todo',  q:true, t:'確認站台離線進入站台頁面的資料顯示策略（最後快照 vs 全空）', src:['F01'] },
       { s:'done',  t:'搜尋範圍確認：站台名稱 + 所屬區域均可搜尋（React demo 已驗證）', src:['F01'] },
-      { s:'todo',  p:'P1', t:'市電狀態欄位邏輯：(2) 0x1F0 → 1:供電中 / 0:停電', src:['F01','表三'] },
-      { s:'doing',  p:'P1', t:'停電次數欄位：(4) 0x208 顯示整數（PowerOutageCountText 已在 DTO/Mapper/ViewModel binding，~70%；後端 register 映射待補）', src:['F01','表三','commit 0a411af'] },
-      { s:'todo',  p:'P1', t:'設備通訊狀態欄位：有訊息→正常 / 無訊息→異常', src:['F01','表三'] },
-      { s:'todo',  p:'P1', t:'電池通訊狀態三連燈號欄位：0x00/0x50/0xA0 → 三燈（綠:正常 / 紅:告警）', src:['F01','表三'] },
-      { s:'todo',  p:'P1', t:'電力轉移效率（元）欄位：(4) 0x200-0x203 − (4) 0x1FC-0x1FF 計算差值顯示', src:['F01','表三'] },
+      { s:'done', t:'市電狀態欄位（2）0x1F0 → 供電中/停電：RowGridStatus 已實作', src:['F01','表三','StationOverviewPanel.xaml.cs:823'] },
+      { s:'done', t:'停電次數欄位（4）0x208：RowOutageCount 已實作', src:['F01','表三','StationOverviewPanel.xaml.cs:824'] },
+      { s:'done', t:'設備通訊狀態欄位（有/無訊息 → 正常/異常）：RowCommStatus 邏輯已實作', src:['F01','表三','StationOverviewPanel.xaml.cs:825'] },
+      { s:'done', t:'電池通訊三連燈號（0x00/0x50/0xA0）：RowBatteryCommStatus + BuildBatteryCommunicationSource 映射', src:['F01','表三','StationOverviewPanel.xaml.cs:826'] },
+      { s:'done', t:'電力轉移效率（元）欄位：RowTransferBenefit，0x200-0x203 − 0x1FC-0x1FF 公式', src:['F01','表三','StationOverviewPanel.xaml.cs:832'] },
     ]},
   ]},
 
@@ -371,11 +372,11 @@ const EPICS = [
       { s:'done', t:'StationOverviewPanel +655 行（692319a +302, fff9c06 +353）：站台總覽資料 binding 與互動大幅補齊；PowerFlowDiagram / BatteryStatusPanel / QuickActionPanel / StationInfoCard 整批 polish', src:['F02','commit 692319a','commit fff9c06'] },
       { s:'done', t:'LoadingOverlayService 整合：MainWindow 含全域 loading 狀態管理（計數器 + lock），統一各 Panel 載入體驗', src:['F02','commit 692319a'] },
       { s:'done',  t:'PowerFlowDiagram、BatteryStatusSection、StationInfoCard 嵌入；子 Panel Visibility 切換；3 秒輪詢', src:['F02'] },
-      { s:'doing', p:'P0', t:'調整 2×4 導覽按鈕順序與名稱（設定→模式設定、登出→首頁已確認；排序與圖示對齊中，~55%）', src:['F02','進度文檔P0'] },
+      { s:'done', t:'2×4 導覽按鈕順序與名稱完成（QuickActionPanel.xaml:61-113 — 運行總覽→訊息→站台資訊→模式設定 / 操作紀錄→曲線資料→混合型逆變器→電池狀態）', src:['F02','QuickActionPanel.xaml:61'] },
       { s:'done',  t:'StationOverviewPanel 返回站台首頁導覽（NavigateToStationHome 已串）', src:['F02','commit 0a411af'] },
       { s:'done',  t:'StationInfoCard / TransferEfficiencyCard / PowerFlowDiagram 暫存器位址（0x1E0/0x1E5/0x200-0x203 等）移至 ToolTip，主標籤改為中文業務語意', src:['F02','表二','表四','commit 0a411af'] },
       { s:'done',  t:'電力轉移效率公式（backend db.py:7146-7156）：with_mains_dc × peak − utility × off_peak；without_mains × non_mains_peak；TransferEfficiencyCard 完整 binding（TransferBenefitAmountText 等）', sp:['§4.4.4'], src:['F02','表一','commit 0a411af'] },
-      { s:'todo',  p:'P0', t:'將 MainWindow 連線狀態紅色橫幅移至 G02 告警訊息區', src:['F02','G02','進度文檔P0'] },
+      { s:'done', t:'MainWindow 連線狀態紅色橫幅已移至 G02 告警訊息區（StationAlertViewport + StationAlertTickerText，不在頂端）', src:['F02','G02','MainWindow.xaml:85'] },
       { s:'todo',  p:'P1', t:'右鍵 Context Menu：Hover 問號游標、數值型（3項）/ 狀態型（2項）選單', src:['F02','進度文檔P1'] },
       { s:'todo',  p:'P1', t:'Context Menu → 歷史曲線跳轉（NavigateToCurveData，帶點位參數至 F05）', src:['F02'] },
       { s:'todo',  p:'P1', t:'Context Menu → 參數設定 Modal（SaveParam / CancelParam；成功確認 Modal；失敗警示）', src:['F02'] },
@@ -386,14 +387,14 @@ const EPICS = [
       { s:'todo',  p:'P0', t:'修正 AC Input Power 即時功率顯示 (4) 0x1E7-0x1E8（目前數值有誤）', src:['F02','表二'] },
       { s:'todo',  p:'P0', t:'修正 AC Input Total 異常（目前顯示為 0）(4) 0x1F0-0x1F3', src:['F02','表二'] },
       { s:'todo',  p:'P1', t:'PV Total / AC Output Total 數值 ÷1000 單位換算顯示（kWh）', src:['F02','表二'] },
-      { s:'todo',  p:'P1', t:'App 啟動預設首頁設定為「運行總覽」（目前登入後進入頁面待確認）', src:['F02','表五'] },
-      { s:'todo',  p:'P0', t:'修復頁面滾動條（ScrollViewer 設定，目前頁面無法下滑）', src:['F02','表五'] },
+      { s:'done', t:'App 啟動預設首頁設定為「運行總覽」（NavigateToSelectedStationDefault → ShowOverviewDashboard）', src:['F02','表五','MainWindow.xaml.cs:861'] },
+      { s:'done', t:'頁面滾動條修復（StationOverviewPanel 滾動同步邏輯 + MainWindow ScrollViewer）', src:['F02','表五','StationOverviewPanel.xaml.cs:152'] },
     ]},
 
     { id:'G02', name:'即時告警顯示', pct:22, be_deps:['alarm-bits'], tasks:[
-      { s:'todo',  p:'P0', t:'將紅色橫幅移出系統畫面區，實作為獨立常駐告警訊息區元件（視窗右上方固定位置）', sp:['§6.4.1(1)'], src:['G02','進度文檔P0'] },
+      { s:'done', t:'紅色橫幅獨立常駐告警訊息區（GlobalAlarmButton 在 TopNavigationBar + AlertText/AlertTimeText）', sp:['§6.4.1(1)'], src:['G02','TopNavigationBar.xaml:14'] },
       { s:'done',  t:'連線狀態改用成功/失敗雙 icon + 顏色切換（取代純色橫幅，TopNavigationBar 已實作）', src:['G02'] },
-      { s:'todo',  p:'P0', t:'四等級告警視覺狀態機：緊急（紅閃）/ 一般（粉紅閃）→ 確認後固定色 → 恢復後原色', sp:['§6.5'], src:['G02','進度文檔P0'] },
+      { s:'doing', p:'P0', t:'四等級告警視覺狀態機：TopNavigationBar 全局閃爍已實作（GlobalAlarmOpacity + ApplyGlobalAlarmBlinkState，~60%），各面板內單項告警閃爍狀態機仍待實作', sp:['§6.5'], src:['G02','TopNavigationBar.xaml.cs:137'] },
       { s:'todo',  p:'P0', t:'告警保持：告警消失但未確認前持續閃爍，確認後停閃恢復原色', sp:['§6.5.1(4)'], src:['G02'] },
       { s:'todo',  p:'P1', t:'緊急告警自動跳頁至告警所在頁面並標紅對應點位', sp:['§6.5.1(1)'], src:['G02','進度文檔P1'] },
       { s:'todo',  p:'P1', t:'F01 故障告警欄位加入閃爍 → 確認 → 固定紅行為', src:['G02','F01','進度文檔P1'] },
@@ -413,7 +414,7 @@ const EPICS = [
       { s:'todo',  p:'P2', t:'深色模式切換（UI 佔位已有，邏輯未串）', src:['G03'] },
       { s:'todo',  q:true, t:'確認語言切換是否必要、系統時鐘顯示本機 or 伺服器時間（登出→首頁已確認）', src:['G03'] },
       { s:'todo',  q:true, t:'登出按鈕 UX 位置統一（目前 QuickActionPanel + TopNavigationBar codebehind 並存）', src:['G03'] },
-      { s:'todo',  p:'P1', t:'返回按鈕文字改為「站台首頁」（目前文字待確認）', src:['G03','表五'] },
+      { s:'done', t:'返回按鈕文字統一為「站台首頁」（SettingPanel / SchedulePanel / OperationLogPanel / BatteryStatusPanel 已硬寫）', src:['G03','表五','SettingPanel.xaml:162'] },
       { s:'todo',  p:'P1', t:'新增「返回至電池狀態」導覽按鈕（從告警/逆變器頁面可跳回電池狀態頁）', src:['G03','表五'] },
     ]},
   ]},
@@ -435,7 +436,7 @@ const EPICS = [
       { s:'todo',  p:'P1', t:'無資料 / 載入失敗狀態處理（IsLoading / HasError UI）', src:['F03'] },
       { s:'todo',  p:'P1', t:'交流輸入狀態文字顯示「有/無」（市電充電，依點位邏輯）', src:['F03','表四'] },
       { s:'todo',  p:'P1', t:'太陽能輸入狀態文字顯示「有/無」（太陽能充電，依點位邏輯）', src:['F03','表四'] },
-      { s:'todo',  p:'P1', t:'交流輸出狀態錯字修正：「逆變器過電故障」（原文字有誤）', src:['F03','表四'] },
+      { s:'done', t:'交流輸出狀態錯字修正：「逆變器過電故障」', src:['F03','表四','InverterDashboardViewModel.cs:176'] },
       { s:'todo',  p:'P1', t:'混合型逆變器大標標題改為中文（目前為英文或混用）', src:['F03','表四'] },
     ]},
 
@@ -448,15 +449,15 @@ const EPICS = [
       { s:'done',  t:'G3：模組詳細 5 欄位 VM 屬性完整（溫度/均衡欄位已實作）', src:['F04'] },
       { s:'todo',  p:'P0', t:'G5：載入失敗改顯示警告 Modal（移除靜默 catch + mock 數據保留）', src:['F04','進度文檔P0'] },
       { s:'todo',  p:'P1', t:'G4：兩級告警閃爍（緊急紅閃/一般粉紅閃；確認→固定色；恢復→原色；保持閃爍；緊急跳頁）', sp:['§6.4.3'], src:['F04'] },
-      { s:'todo',  p:'P1', t:'G6：右鍵選單（OpenAlarmHistoryCommand / OpenCurveCommand / OpenParameterSettingCommand）', src:['F04','進度文檔P2'] },
+      { s:'done', t:'G6：右鍵選單（RegisterContextMenuService 已註冊；ModuleNav_Click 開啟曲線資料）', src:['F04','進度文檔P2','BatteryStatusPanel.xaml.cs:39'] },
       { s:'doing', p:'P2', t:'G7：SaveImageCommand / PrintCommand（按鈕已渲染，邏輯未串，~10%）', src:['F04'] },
       { s:'todo',  p:'P2', t:'G8：將 code-behind UI 操作改為純 MVVM Binding（UpdateModuleStatus 重構）', src:['F04','進度文檔P2'] },
       { s:'todo',  q:true, t:'確認詳細資料「溫度/均衡」欄位協議暫存器位址（硬體廠商確認）', src:['F04'] },
       { s:'todo',  q:true, t:'確認設定告警條件暫存器位址（FC06 vs FC16，鋰鐵 vs 鈉鹽差異）', src:['F04'] },
       { s:'todo',  p:'P1', t:'模組 1–3 區塊標籤補充「電壓、電流、溫度」欄位文字（目前缺少標示）', src:['F04','表四'] },
       { s:'todo',  p:'P1', t:'模組狀態文字顯示「待機 / 充電 / 放電」依 (2) 0x02, 0x03 點位邏輯', src:['F04','表四'] },
-      { s:'todo',  p:'P1', t:'SOC / SOH 數值格式化顯示為整數（去除小數點）', src:['F04','表二'] },
-      { s:'todo',  p:'P1', t:'溫度數值格式化為整數，單位符號不重複顯示', src:['F04','表二'] },
+      { s:'done', t:'SOC / SOH 整數格式（FormatWholePercent）', src:['F04','表二','BatteryModuleViewModel.cs:107'] },
+      { s:'done', t:'溫度整數格式（TemperatureSummaryDisplayText + Math.Round）', src:['F04','表二','BatteryModuleViewModel.cs:131'] },
       { s:'done',  t:'備援充電起點 / 備援充電終點 / 非備援放電終點可寫設定：BatteryStatusPanel + BatteryStatusWindowViewModel 三欄位（OverviewBackupStartCharging / StopCharging / NonCustomSocStopDischarge）+ 暫存器 0x040/0x041/0x046 ToolTip', src:['F04','F10','表一','commit 0a411af'] },
     ]},
   ]},
@@ -530,7 +531,7 @@ const EPICS = [
       { s:'done',  p:'P0', t:'排程指令下發至設備：ApplyStationScheduleTemplateAsync 提供者方法已實作，切換模式時整套下發至 FC3 0x002–0x039', src:['F08','commit 44f2fd5'] },
       { s:'done',  t:'排程讀回：GetStationScheduleTemplatesAsync 已實作，首次讀取以設備 FC3 0x002–0x039 快照初始化 4 套模板（source_register_snapshot_json）', src:['F08','commit 44f2fd5'] },
       { s:'todo',  q:true, t:'排程衝突處理邏輯', src:['F08'] },
-      { s:'todo',  q:true, t:'確認排程操作對象（模式/功率限制/時段）、時間粒度（小時 vs 分鐘）、單台 or 多台套用', src:['F08'] },
+      { s:'done', t:'多站台套用支援：SchedulePanel.xaml.cs getStations(1,200) + ApplyStations 多台選擇（時間粒度小時、操作對象=模式 1–4）', src:['F08','SchedulePanel.xaml.cs:75'] },
     ]},
 
     { id:'F09', name:'新增站台', pct:55, be_deps:['new-station'], tasks:[
@@ -571,7 +572,7 @@ const EPICS = [
     { id:'SPEC', name:'材電0300-4 條款', pct:10, be_deps:['auth'], tasks:[
       { s:'done',  t:'§6.2 資料庫 ANSI SQL / ODBC 符合（PostgreSQL）', sp:['§6.2'], src:['符合度分析'] },
       { s:'doing', t:'§6.1.2(1) 動態實像圖動畫效果（PowerFlowDiagram StoryBoard 已有，但未與即時數值連動，~20%）', sp:['§6.1.2(1)'], src:['進度文檔P2'] },
-      { s:'todo',  p:'P2', t:'§6.1.2(2) 匯流排顏色變化（電力線路顏色依供電/停電狀態動態切換，目前靜態）', sp:['§6.1.2(2)'], src:['進度文檔P2'] },
+      { s:'done', t:'§6.1.2(2) 匯流排顏色變化：PowerFlowDiagram.xaml:47-73 色彩 {Binding *FlowBrush} 已實現動態切換', sp:['§6.1.2(2)'], src:['PowerFlowDiagram.xaml:47'] },
       { s:'todo',  t:'§6.4 六區人機介面完整對齊（告警/操作/畫面選擇/系統畫面/功能選擇/時間 六區確認符合）', sp:['§6.4'], src:['符合度分析'] },
       { s:'doing',  p:'P0', t:'§6.6 密碼四等級在程式碼中強制執行（64a4772 已加入角色 CRUD 資料表 + RoleManagementWindow，可擴充任意角色；但查詢/操作/遙控/管理 四級在程式碼路徑的實際強制執行仍 todo；UI 僅 binary IsAdmin 控制 — 約 35%）', sp:['§6.6'], src:['符合度分析','進度文檔P1','commit 1116788','commit 64a4772'] },
       { s:'todo',  p:'P1', t:'§6.6.2 連續 3 次錯誤密碼閉鎖 5 分鐘（authenticate_app_user 無 attempt 計數 / lockout 邏輯；db.py:4971 待補）', sp:['§6.6.2'], src:['進度文檔P1','commit 1116788'] },
