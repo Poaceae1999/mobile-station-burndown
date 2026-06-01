@@ -167,7 +167,8 @@ function downloadThisPage(){
       <li><span class="changelog-tag ct-done">E0 +2 done</span> <strong>中央 Ubuntu 多站點 Station Agent 管理（一站一實例 systemd）</strong>（d0deabc）：新增 cloud/common/station_agent.py 177 行（get_station_agent_config / update_station_agent_config / validate_station_agent_config / run_station_agent_action）+ cloud/common/config.py +37 + cloud/services/api/main.py +86（GET /stations/{id}/agent-config / PUT 更新 / POST agent-config/validate / POST agent/{start|stop|restart} + 完整 audit_log 寫入）+ deploy/systemd/mobile-station-agent@.service + ubuntu/systemd/mobile-station-agent@.service + install_multi_station_agent_support.sh（72 行）。</li>
       <li><span class="changelog-tag ct-done">E0 +1 done</span> <strong>運維文件補齊</strong>：docs/centralized_station_agent_management.md 318 行設計文件（一站一實例 / YAML / systemd / state DB / monitor port / WPF 設定整合）+ docs/station_agent_aws_rollout_checklist.md 183 行 AWS rollout checklist。</li>
       <li><span class="changelog-tag ct-done">F02 fix</span> <strong>PowerFlowDiagram 顏色統一 + 判斷邏輯還原</strong>（9078d44 + c97f611）：電池回流路徑色彩統一 #CBD5E1；gridBlocked 加入 batteryPower &lt; -0.01 條件（電池放電也阻擋市電）；outputState 加入 pvPower &gt; acOutputPower + 0.01 條件（PV 供電負載顯示輸出流向）；XAML conflict resolve 保留 upstream 電池路徑座標；StationSnapshotMapper.cs +5 / MockData/curve-menu.json -20 配套。</li>
-      <li><span class="changelog-tag ct-upd">資料</span> 燃盡圖 06-01：FE done 91→96 pts（+5：F08 overview 模板套用 / F08 多站台 scope / F10 station agent UI ×2 / F10 BackupControl 多站台）／ BE done 27→29 pts（+2：station_agent module + agent endpoint suite）。FE total 157→162（+5 新 task）／ BE total 29→31（+2）。FE 剩 66 pts、BE 剩 2 pts；累計完成 FE 59% / BE 94%。</li>
+      <li><span class="changelog-tag ct-upd">資料</span> 燃盡圖 06-01：FE done 91→98 pts（+7：今日實際 commit +5 — F08 overview 模板套用 / F08 多站台 scope / F10 station agent UI ×2 / F10 BackupControl 多站台；audit 翻牌 +2 — F03 市電充電「有/無」、F03 太陽能充電「有/無」原 todo→done，確認 mapper:1430 normalize 完整鏈路）／ BE done 27→29 pts（+2：station_agent module + agent endpoint suite）。FE total 157→162（+5 新 task）／ BE total 29→31（+2）。FE 剩 64 pts、BE 剩 2 pts；累計完成 FE 60% / BE 94%。</li>
+      <li><span class="changelog-tag ct-done">audit 翻牌</span> 額外修正：F06 「告警篩選維度定義」原 todo（待確認）→ doing ~70%（時間範圍 + 等級 tab + 分頁已完整實作，AlarmLogPanel.xaml:276-310 / AlarmLogWindowViewModel.cs:184；仍缺 分區/站台 filter 與 status filter active/resolved/acknowledged）；F06 「告警匯出 ExportCommand」狀態保持 todo（grep 全 0 結果，未實作），優先序由 待確認 → P2。</li>
       <li><span class="changelog-tag ct-confirm">節奏</span> <strong>衝刺後加場</strong>：05-30 衝刺收斂後仍有 05-31 / 06-01 兩日新代碼工作（多站台運維 + Station Agent 中央管理），屬於下一輪「多站運維」交付的提前啟動。剩餘 FE 主項仍為：§6.6 四等級權限程式碼路徑強制執行、F05 對數刻度、F03 PrintCommand/SaveImage/告警閃爍、F02 ContextMenu NavigateToMessages、G02 緊急自動跳頁/聲音告警、F11 韌體升級、F10 版本控管/效率公式 Tooltip。</li>
     </ul>
   </div>
@@ -239,7 +240,7 @@ const BURNDOWN = {
     ['2026-06-01', null], // 衝刺後加場 D2：d0deabc + e9853eb + c97f611 + 9078d44 — F10 SettingPanel station agent UI / F02 PowerFlow 顏色 + 邏輯還原 / E0 cloud station_agent.py + API + 文件
   ],
   // 累積完成 pts（與 fe[] 對齊）
-  fe_done_at:  [0,   4,   12,  20,  26,  42,  54,  63,  65,  73,  82,  86,  88,  88,  88,  91,  94,  96],
+  fe_done_at:  [0,   4,   12,  20,  26,  42,  54,  63,  65,  73,  82,  86,  88,  88,  88,  91,  94,  98],
   // 該日期當下 FE 總範圍（估計：含已知任務新增；今日 = countTasks 實算）
   fe_total_at: [122, 122, 125, 128, 130, 137, 143, 146, 146, 149, 152, 152, 155, 155, 155, 157, 160, 162],
 
@@ -426,7 +427,7 @@ const EPICS = [
   /* ═══ E3: 設備狀態監控 ══════════════════════════════════ */
   { id:'E3', name:'設備狀態監控', color:'#10B981', sub:'F03 · F04', layer:'fe', cards:[
 
-    { id:'F03', name:'混合型逆變器狀態', pct:58, be_deps:['device-points','alarm-bits'], tasks:[
+    { id:'F03', name:'混合型逆變器狀態', pct:67, be_deps:['device-points','alarm-bits'], tasks:[
       { s:'done', t:'InverterDashboard PowerFlow 版面調整（PowerFlowDiagram.xaml 48 行 + InverterDashboardPanel 精簡 -22 行）', src:['F03','commit a6a1649'] },
       { s:'done', t:'InverterDashboardPanel UI 回饋（移除頂部標題列重複文字 + 曲線資料 nav 按鈕 + 告警頁返回更名「混合型逆變器狀態」）', src:['F03','commit 15b1764','commit 26b6d88'] },
       { s:'done', t:'InverterDashboardPanel.xaml +106 行：逆變器 dashboard 視覺與 binding polish', src:['F03','commit fff9c06'] },
@@ -438,8 +439,8 @@ const EPICS = [
       { s:'doing', p:'P1', t:'PrintCommand（呼叫系統列印對話框；失敗 Modal；離線 PDF 備選，按鈕已渲染，~10%）', src:['F03','進度文檔P1'] },
       { s:'doing', p:'P1', t:'SaveImageCommand（SaveFileDialog + PNG 輸出；失敗 Modal，按鈕已渲染，~10%）', src:['F03','進度文檔P1'] },
       { s:'todo',  p:'P1', t:'無資料 / 載入失敗狀態處理（IsLoading / HasError UI）', src:['F03'] },
-      { s:'todo',  p:'P1', t:'交流輸入狀態文字顯示「有/無」（市電充電，依點位邏輯）', src:['F03','表四'] },
-      { s:'todo',  p:'P1', t:'太陽能輸入狀態文字顯示「有/無」（太陽能充電，依點位邏輯）', src:['F03','表四'] },
+      { s:'done', t:'交流輸入狀態文字顯示「有/無」（市電充電，依 0x1F4 點位）：StationSnapshotMapper.cs:1095-1096 ResolveFlowFlag + :1430 normalize→「有」/「無」；cloud/common/db.py:9736 _protocol_availability_item("市電充電 (2) 0x1F4", 4)；InverterDashboardViewModel.cs:164 KeyValueItem 鏈路完整', src:['F03','表四','StationSnapshotMapper.cs:1430'] },
+      { s:'done', t:'太陽能輸入狀態文字顯示「有/無」（太陽能充電，依 0x1F5 點位）：同上模式；StationSnapshotMapper.cs:1099 / db.py:9745 _protocol_availability_item("太陽能充電 (2) 0x1F5", 5) / InverterDashboardViewModel.cs:168', src:['F03','表四','StationSnapshotMapper.cs:1099'] },
       { s:'done', t:'交流輸出狀態錯字修正：「逆變器過電故障」', src:['F03','表四','InverterDashboardViewModel.cs:176'] },
       { s:'done', t:'混合型逆變器大標標題改為中文（"混合型逆變器狀態"）', src:['F03','表四','InverterDashboardPanel.xaml:184'] },
     ]},
@@ -507,8 +508,8 @@ const EPICS = [
       { s:'done',  p:'P0', t:'從後台取得站台告警記錄（HttpStationDataProvider 已串真實 API）', src:['F06','commit 44f2fd5'] },
       { s:'done',  t:'確認告警動作（AlarmStatusDialogService 491 行新增：自訂 WPF 確認對話框 + Status/Label 卡片視覺狀態；UpdateAlarmStatusAsync 提供者方法已實作）', sp:['§6.5'], src:['F06','commit 44f2fd5'] },
       { s:'todo',  t:'告警記錄必要欄位：機房名/群名/I/O名/狀態/等級/發生時間/確認時間/恢復時間/持續時間', sp:['§6.5.2'], src:['F06'] },
-      { s:'todo',  q:true, t:'告警篩選維度定義（時間範圍/等級/分區/狀態 active/resolved/acknowledged）', src:['F06'] },
-      { s:'todo',  q:true, t:'確認告警匯出功能需求（ExportCommand，格式 CSV or Excel）', src:['F06'] },
+      { s:'doing', p:'P1', t:'告警篩選維度（~70%）：時間範圍（StartDate/EndDate + TimePicker + 最近 24 小時快捷鈕，AlarmLogPanel.xaml:276-310）+ 等級分 tab（CountTabItem critical→主要 / major→主要 / minor→次要 / info→一般，AlarmLogWindowViewModel.cs:184）+ 分頁完整；仍缺 分區/站台 filter 與 status filter（active/resolved/acknowledged）', src:['F06','AlarmLogPanel.xaml:276'] },
+      { s:'todo',  p:'P2', t:'告警匯出功能（ExportCommand，CSV/Excel）— grep ExportAlarm / 匯出 全 0 結果，尚未實作', src:['F06'] },
     ]},
 
     { id:'F07', name:'操作紀錄', pct:94, be_deps:['op-log'], tasks:[
