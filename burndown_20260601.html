@@ -820,25 +820,42 @@ function toggleEpic(id) {
 function initBurndown(canvasId, dates, doneList, totalList) {
   const totalToday = totalList[totalList.length - 1];
 
+  // X 軸：05-01 起，延伸至 06-15（5月31天 + 6月15天 = 46 點）
+  const AXIS_START = new Date('2026-05-01T00:00:00');
+  const AXIS_END   = new Date('2026-06-15T00:00:00');
+  const DAY_MS = 86400000;
+  const axisLen = Math.round((AXIS_END - AXIS_START) / DAY_MS) + 1; // 46
+  const SPRINT_DAYS = 30; // 理想線仍以原 30 天衝刺為基準（05-01 → 05-30）
+
   const labels = [], idealPts = [];
-  for (let d = 1; d <= 30; d++) {
-    labels.push(`05-${String(d).padStart(2,'0')}`);
-    // 理想線以「最終範圍」為基準
-    idealPts.push( +(totalToday * (1 - (d-1)/29)).toFixed(1) );
+  for (let i = 0; i < axisLen; i++) {
+    const d = new Date(AXIS_START.getTime() + i * DAY_MS);
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
+    labels.push(`${mm}-${dd}`);
+    // 理想燃盡線：05-01 起 30 天內線性遞減到 0，之後保持 0
+    if (i < SPRINT_DAYS) {
+      idealPts.push( +(totalToday * (1 - i / (SPRINT_DAYS - 1))).toFixed(1) );
+    } else {
+      idealPts.push(0);
+    }
   }
 
-  // 建立 day → (剩餘, 範圍, 已完成) 映射
+  // 建立 「日期字串」→ (剩餘, 範圍, 已完成) 映射，再對齊 labels
   const remainMap = {}, scopeMap = {}, doneMap = {};
   dates.forEach((date, i) => {
-    const day = parseInt(date.split('-')[2]);
-    remainMap[day] = totalList[i] - doneList[i];
-    scopeMap[day]  = totalList[i];
-    doneMap[day]   = doneList[i];
+    const d = new Date(date + 'T00:00:00');
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
+    const key = `${mm}-${dd}`;
+    remainMap[key] = totalList[i] - doneList[i];
+    scopeMap[key]  = totalList[i];
+    doneMap[key]   = doneList[i];
   });
 
-  const actualPts = labels.map((_, i) => remainMap[i+1] ?? null);
-  const scopePts  = labels.map((_, i) => scopeMap[i+1]  ?? null);
-  const donePts   = labels.map((_, i) => doneMap[i+1]   ?? null);
+  const actualPts = labels.map(lb => remainMap[lb] ?? null);
+  const scopePts  = labels.map(lb => scopeMap[lb]  ?? null);
+  const donePts   = labels.map(lb => doneMap[lb]   ?? null);
 
   new Chart(document.getElementById(canvasId).getContext('2d'), {
     type: 'line',
