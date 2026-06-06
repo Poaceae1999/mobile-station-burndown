@@ -175,7 +175,8 @@ function downloadThisPage(){
       <li><span class="changelog-tag ct-upd">狀態</span> <strong>G02 §6.5 四等級告警視覺狀態機</strong> doing 60% → <strong>doing 75%</strong>（電池/逆變器通訊告警閃爍 Storyboard 已落地；ack-fix 與「緊急 vs 一般」雙級別仍缺）；<strong>F02 §6.1.2(1) 動態實像圖動畫</strong> doing 20% → <strong>doing 70%</strong>（動畫流動球與 ArrowVisibility 連動）。</li>
       <li><span class="changelog-tag ct-done">audit 翻牌</span> <strong>F05 對數刻度 Y 軸 log scale — todo → done</strong>（過去誤標）：補三線索搜尋發現 AnalysisDashboardPanel.xaml:460 <code>YAxisModeComboBox</code> 下拉選單 + xaml:467 <code>&lt;ComboBoxItem Content="Log" Tag="log"/&gt;</code> + xaml.cs:635 <code>YAxisModeComboBox_SelectionChanged</code> 事件 + xaml.cs:3756 <code>TransformValue</code> 用 <code>Math.Log10(Math.Max(0.000001, value - MinValue + 1d))</code> + xaml.cs:3773 <code>ValueAtRatio</code> 反向 <code>Math.Pow(10, transformed) - 1d</code>。前一次 audit 只搜「LogScale / log_scale / 對數」三 keyword 全 0 結果而誤判，本次補搜「Math.Log10 / YAxisMode」立刻命中（典型「中文/英文 keyword 不對」漏判模式）。</li>
       <li><span class="changelog-tag ct-confirm">audit 維持</span> <strong>其他 todo/doing 全項重新驗證</strong>：§6.6.2 連續錯誤密碼閉鎖 grep cloud/common/db.py + api/main.py 無 lockout / failed_attempt / login_attempt — 維持 todo；F11 韌體升級 grep firmware/升級 僅有 FirmwareVersion 顯示，無升級邏輯 — 維持 todo；F09 連線驗證 ValidateCommand 在 AddStationWindow 無實作 — 維持 todo；F03/F04 兩級告警閃爍 grep EmergencyAlarm/RedFlash/PinkFlash 全 0 — 維持 todo（IsCommError 通訊閃爍已 done 但不算「告警等級閃爍」）；G02 聲音告警 grep SoundPlayer/MediaPlayer/SystemSounds/NAudio 全 0 — 維持 todo；F10 IsDirty/ResetCommand 在 SettingWindowViewModel 無 — 維持 todo；F10 效率公式 Tooltip 在 TariffRateSettingsWindow 無 — 維持 todo；F03 PrintCommand/SaveImageCommand 僅 icon Geometry，無 Click handler — 維持 doing 10%；F04 G7 同上 — 維持 doing 10%；F01 DispatchPhase 僅 docs 提到 — 維持 todo；F01 災害調度/備援放電「勾選下發」僅 label binding 無下發邏輯 — 維持 todo；E0 CHT 上報 grep 全 0 — 維持 todo。本日無 done→regression。</li>
-      <li><span class="changelog-tag ct-upd">資料</span> 燃盡圖 06-06：FE done 105→116 pts（+11：實際 commit 工作 +10 — F02 +2 / F03/F04/G02 +1 通訊告警閃爍 / F05 +4 圖表精修 / F08 +1 apply flow / F10/F06 +1 AlarmSettings 三度 / F01/F02 +1 站台總覽通訊告警；audit 補認 +1 — F05 對數刻度 Y 軸 log scale 翻牌 todo→done）／ BE done 32→34 pts（+2：通訊告警判定後端 / 排程 apply flow 後端配套）。FE total 165→175（+10 新 task）／ BE total 33→35（+2 新 task）。FE 剩 59 pts、BE 剩 1 pt；累計完成 FE 66% / BE 97%。</li>
+      <li><span class="changelog-tag ct-done">方法論升級</span> <strong>方法論三件套（06-06 一次性 audit + 重建）</strong>：（A）渲染器改用 <code>countTasks(card)</code> 動態算每張 Feature Card 的 % — <strong>廢除手填 c.pct 欄位</strong>（過去 8 張卡片 pct 與實算差 ≥10%，最嚴重 F01 +45% / F02 −20% / G03 −17% / F10 −17%）；（B）新增 <strong>E8 UX 精修 epic</strong>（粉紅色 #EC4899）作為 commit 流量中「視覺/互動/micro-copy」類工作的合法落帳位置 — 原規格材電 0300-4 僅要求功能存在，未規範動畫流暢度等 UX 維度；E8 含 7 張 UX 卡片（PowerFlow 互動、通訊告警閃爍狀態機、Chart 圖表互動、TimePicker 統一、Nav/標題列 UI 回饋、Dashboard 子面板視覺整合、文字/語系/中文化），共 32 done + 2 todo；（C）重設 06-06 snapshot 對齊 <code>countTasks</code> 實算（廢除手工維護的 fe_done_at 末日點漂移）— FE 116→<strong>172</strong> done（含 E8 +32 補認 + 過去 commit 工作 +24 補認）／ FE total 175→<strong>236</strong>／ BE 34→<strong>30</strong> done（過去 changelog 「+N done」灌水 -4 修正）／ BE total 35→<strong>36</strong>。</li>
+      <li><span class="changelog-tag ct-upd">資料</span> 燃盡圖 06-06（重建後）：FE 172/236（剩 64 pts，完成 73%）— spec/feature 子集 140/202（剩 62）、E8 UX 子集 32/34（剩 2，完成 94%）／ BE 30/36（剩 6 pts，完成 83%）。<strong>從此 SSOT：每日 generator 直接寫入 <code>countTasks</code> 結果，禁止人工估算偏差</strong>。</li>
       <li><span class="changelog-tag ct-confirm">節奏</span> <strong>D6/D7 — UX 收斂期</strong>：16 個 commits 全部聚焦在「使用者每天會看到的視覺體驗」— 動畫、閃爍、圖表精度、apply flow 流暢度。剩餘 FE 主項：§6.6.2 連續錯誤密碼閉鎖、F05 對數刻度、F03 PrintCommand/SaveImage/「緊急/一般」雙級告警、F02 ContextMenu NavigateToMessages、G02 緊急自動跳頁/聲音告警、F11 韌體升級、F09 連線驗證、F10 設定版本控管/效率公式 Tooltip。</li>
     </ul>
   </div>
@@ -252,9 +253,9 @@ const BURNDOWN = {
     ['2026-06-06', null], // 衝刺後加場 D6/D7（06-04～06-06，16 個新 commits — UX 收斂期）：F02 PowerFlowDiagram 動畫流動球（49e5d00 StartFlowBallAnimations 4 軌道）+ 電池滿載抑制 bypass 線（a483e51）／ F03/F04/G02 通訊告警閃爍狀態機（3a6b1f6 ComponentStyles IsCommError BeginStoryboard 0.5s 雙色 + IsPingLost 3pt 藍框疊層 + 黃閃文字 overlay）／ F05 圖表精修五連發（dbc4ca6 MVVM ChartLegendPanel 眼睛/星號/pin persistence、2f18019 realtime duration chips + 今日固定窗口、57b9c3e aggregate point 曲線、9526e10/c38cabb/448c377/4f98e60 Y 軸標籤四連修）／ F08 SchedulePanel apply flow 768 行 polish（f6e2368）／ F10/F06 AlarmSettings UX 三度精修（f6e2368）／ F01/F02 站台總覽通訊告警行為調整（84d40dc db.py +68）
   ],
   // 累積完成 pts（與 fe[] 對齊）
-  fe_done_at:  [0,   4,   12,  20,  26,  42,  54,  63,  65,  73,  82,  86,  88,  88,  88,  91,  94,  98,  99,  105, 116],
-  // 該日期當下 FE 總範圍（估計：含已知任務新增；今日 = countTasks 實算）
-  fe_total_at: [122, 122, 125, 128, 130, 137, 143, 146, 146, 149, 152, 152, 155, 155, 155, 157, 160, 162, 163, 165, 175],
+  fe_done_at:  [0,   4,   12,  20,  26,  42,  54,  63,  65,  73,  82,  86,  88,  88,  88,  91,  94,  98,  99,  105, 172],
+  // 該日期當下 FE 總範圍（今日 = countTasks 實算，含 E8 UX）
+  fe_total_at: [122, 122, 125, 128, 130, 137, 143, 146, 146, 149, 152, 152, 155, 155, 155, 157, 160, 162, 163, 165, 236],
 
   be: [
     ['2026-05-01', null], // 預備期已完成 3 pts
@@ -276,8 +277,8 @@ const BURNDOWN = {
     ['2026-06-04', null], // 9ec62ce：cloud/services/api/main.py +135（_permission_codes / _has_permission / _require_permission / _has_any_permission + 11+ permission code 套到 alarm-settings / tariff / mode / feature / site_info / audit endpoints）+ cloud/common/db.py +191（alarm_operator 角色 + permissions_json 欄位序列化 + _ensure_default_app_users 預設）
     ['2026-06-06', null], // 84d40dc：cloud/common/db.py +68（站台總覽通訊告警判定資料路徑） + f6e2368：cloud/common/db.py +63 + cloud/services/api/main.py +25（排程模板 apply flow 後端配套 — mode_value / multi-station scope / template isolation 持久化強化）
   ],
-  be_done_at:  [3,  7,  11, 14, 18, 18, 22, 24, 25, 26, 26, 26, 27, 27, 29, 30, 32, 34],
-  be_total_at: [13, 15, 17, 19, 22, 22, 26, 27, 27, 28, 28, 28, 29, 29, 31, 32, 33, 35],
+  be_done_at:  [3,  7,  11, 14, 18, 18, 22, 24, 25, 26, 26, 26, 27, 27, 29, 30, 32, 30],
+  be_total_at: [13, 15, 17, 19, 22, 22, 26, 27, 27, 28, 28, 28, 29, 29, 31, 32, 33, 36],
 
   // 範圍新增事件（用於圖上 annotation）
   scope_events: [
@@ -671,6 +672,70 @@ const EPICS = [
       { s:'todo',  t:'確認各節點時間校準設定（防止告警/紀錄時間偏差）', sp:['4.4.4(3)'], src:['符合度分析'] },
     ]},
   ]},
+
+  /* ═══ E8: UX 精修（material spec 未覆蓋的視覺/互動工作） ════
+     本 epic 為 UX 工作的合法落帳位置。原規格（材電 0300-4）僅要求功能存在，
+     未規定動畫流暢度、視覺一致性、互動 affordance、micro-copy 等。
+     新增 06-06 以追蹤 commit 流量中的「使用者體驗精修」類工作。
+     計分原則：每個 task = 1 point（與其他 epic 一致），但對應 commit 群組
+     而非單一 commit；若同一 UX 主題後續再 polish 則新增 v2/v3 task 不覆寫。 */
+  { id:'E8', name:'UX 精修', color:'#EC4899', sub:'視覺 / 互動 / micro-copy 累積工作', layer:'fe', cards:[
+
+    { id:'UX-PowerFlow', name:'PowerFlowDiagram 互動視覺', tasks:[
+      { s:'done', kind:'ux', t:'動畫流動球 v1（49e5d00）— StartFlowBallAnimations 4 軌道 forward arrow 球體動畫，依 ArrowVisibility 連動', src:['F02','commit 49e5d00'] },
+      { s:'done', kind:'ux', t:'電池滿載抑制 bypass 線（a483e51）— 避免「電池滿 + PV 部分供電負載」情境下誤導性顯示市電 bypass', src:['F02','commit a483e51'] },
+      { s:'done', kind:'ux', t:'雙箭頭層渲染（2753891）— 灰底常駐軌道 + 彩色 forward arrow 雙層；canvas 1140×620 → 1080×560 精簡；標題固定為「儲能系統流程圖」', src:['F02','commit 2753891'] },
+      { s:'done', kind:'ux', t:'顏色統一 + 判斷邏輯還原（9078d44 + c97f611）— 電池回流路徑色彩 #CBD5E1；gridBlocked / outputState 邏輯精修', src:['F02','commit 9078d44','commit c97f611'] },
+      { s:'todo', kind:'ux', t:'v2 — 球速隨功率值動態調整 + 流向反向時的視覺切換', src:['F02','§6.1.2(1)'] },
+    ]},
+
+    { id:'UX-CommAlarm', name:'通訊告警閃爍視覺狀態機', tasks:[
+      { s:'done', kind:'ux', t:'IsCommError BeginStoryboard 黃閃（3a6b1f6）— ComponentStyles.xaml +52 / Storyboard 0.5s 雙色 DiscreteObjectKeyFrame', src:['G02','F03','F04','commit 3a6b1f6'] },
+      { s:'done', kind:'ux', t:'IsPingLost 3pt 藍框疊層 + 黃閃文字 overlay（3a6b1f6）— BatteryStatusPanel ComputeIsPingLost', src:['G02','F04','commit 3a6b1f6'] },
+      { s:'done', kind:'ux', t:'IsCommError 屬性鏈鋪 5 個 VM（StationViewModel / BatteryModuleViewModel / BatteryStatusWindowViewModel / InverterDashboardViewModel / MainWindow）', src:['G02','commit 3a6b1f6'] },
+      { s:'todo', kind:'ux', t:'v2 — 緊急/一般 兩級閃爍區分（紅閃 / 粉紅閃）+ ack-to-fix（確認後固定色）', sp:['§6.5'], src:['G02'] },
+    ]},
+
+    { id:'UX-Chart', name:'AnalysisDashboardPanel 圖表互動', tasks:[
+      { s:'done', kind:'ux', t:'MVVM ChartLegendPanel — 眼睛/星號 toggle + pin persistence（dbc4ca6）', src:['F05','commit dbc4ca6'] },
+      { s:'done', kind:'ux', t:'Realtime duration chips + 今日固定窗口模式（2f18019）', src:['F05','commit 2f18019'] },
+      { s:'done', kind:'ux', t:'Y 軸標籤四連修（4f98e60 + 448c377 + c38cabb + 9526e10）— 對齊 gridline / Canvas 置中 / 自適精度 / 整數強制', src:['F05'] },
+      { s:'done', kind:'ux', t:'Path B 曲線版面收斂（6 連發 a00dac6+b5778bf+41b29c3+6a8c7a2+bfe63ee+974b31d）— 動態填色 + 緊湊控件 + 合併標題列', src:['F05'] },
+      { s:'done', kind:'ux', t:'階層 TreeView 曲線選單取代平面按鈕（f3baecd）', src:['F05'] },
+      { s:'done', kind:'ux', t:'hover 空白區 "--" + 實際游標時間（37d3938）+ CSV export 空白欄修（05594e2）', src:['F05'] },
+    ]},
+
+    { id:'UX-TimePicker', name:'時間選擇器統一', tasks:[
+      { s:'done', kind:'ux', t:'AlarmLogPanel 時間選擇器改為 DatePicker + TimePicker（取代 hc:DateTimePicker，修選取問題）；DateTimeFormat 統一 yyyy-MM-dd HH:mm（638c97f / 7e3ddf1 / c4a2fef）', src:['F06'] },
+      { s:'done', kind:'ux', t:'OperationLogPanel 時間選擇器同步改造（638c97f / eb55a2d / 2158876 / 6ddac69 / c95f5d0 / c4a2fef）', src:['F07'] },
+    ]},
+
+    { id:'UX-NavCleanup', name:'導覽/標題列 UI 回饋整批', tasks:[
+      { s:'done', kind:'ux', t:'移除各 Panel 頂部標題列重複文字（15b1764）— InverterDashboardPanel / BatteryStatusPanel / AlarmLogPanel / OperationLogPanel 等', src:['F03','F04','F06','F07','commit 15b1764'] },
+      { s:'done', kind:'ux', t:'返回按鈕文字統一「站台首頁」（SettingPanel / SchedulePanel / OperationLogPanel / BatteryStatusPanel；55d5b7b / 6ddac69）', src:['G03'] },
+      { s:'done', kind:'ux', t:'2×4 導覽按鈕順序與名稱排序（QuickActionPanel.xaml:61-113）', src:['F02'] },
+      { s:'done', kind:'ux', t:'TopNavigationBar 完整重構 +172 xaml +38 cs（692319a）— 頂部列視覺強化', src:['G03','commit 692319a'] },
+      { s:'done', kind:'ux', t:'LoginWindow LoginLoadingPanel 防重複提交 + SetLoginLoading 鎖定（692319a）', src:['G03','commit 692319a'] },
+      { s:'done', kind:'ux', t:'登出按鈕從 ⚙ icon 改為「登出」中文圓角按鈕（692319a）', src:['G01'] },
+    ]},
+
+    { id:'UX-Dashboard', name:'Dashboard 子面板視覺整合', tasks:[
+      { s:'done', kind:'ux', t:'StationOverviewPanel +655 行（692319a +302 / fff9c06 +353）— 站台總覽 binding 與互動大幅補齊', src:['F02'] },
+      { s:'done', kind:'ux', t:'LoadingOverlayService 整合（692319a）— MainWindow 全域 loading 狀態（計數器 + lock）', src:['F02'] },
+      { s:'done', kind:'ux', t:'BatteryStatusPanel 隱藏暫存器位址 label（-100 行 XAML）— 畫面更乾淨；備援控制獨立至 BackupControlSettingsWindow', src:['F04','commit 64a4772'] },
+      { s:'done', kind:'ux', t:'InverterDashboardPanel +106 行 dashboard 視覺與 binding polish（fff9c06）', src:['F03'] },
+      { s:'done', kind:'ux', t:'暫存器位址移至 ToolTip — StationInfoCard / TransferEfficiencyCard / PowerFlowDiagram 主標籤改中文業務語意（0a411af）', src:['F02'] },
+      { s:'done', kind:'ux', t:'AddStationWindow UI 簡化 -27 行 XAML（e326ea7 + 6c4c190）', src:['F09'] },
+      { s:'done', kind:'ux', t:'SettingPanel 站台設備資訊頁 -153 行 XAML（3d65b08 / 1b69fb8 / 0381a7f）', src:['F10'] },
+    ]},
+
+    { id:'UX-Localization', name:'文字 / 語系 / 中文化', tasks:[
+      { s:'done', kind:'ux', t:'混合型逆變器大標標題改為中文 "混合型逆變器狀態"', src:['F03'] },
+      { s:'done', kind:'ux', t:'交流輸入/太陽能輸入狀態文字「有/無」（市電充電/太陽能充電 0x1F4/0x1F5）', src:['F03'] },
+      { s:'done', kind:'ux', t:'AlarmLogWindowViewModel severity 標籤 remap：critical/major→主要告警、minor→次要告警、info→一般訊息（5525454）', src:['F06'] },
+      { s:'done', kind:'ux', t:'語言切換中/EN（LocalizationManager + ResourceDictionary + 持久化）', src:['G03'] },
+    ]},
+  ]},
 ];
 
 /* ════════════════════════════════════════════════════════
@@ -707,6 +772,9 @@ function epicHTML(e) {
   const pct = st.total ? Math.round(st.done / st.total * 100) : 0;
   const cardsHTML = e.cards.map(c => {
     const rows = c.tasks.map(taskHTML).join('');
+    // SSOT: 卡片 pct 直接從 countTasks 算，廢除手填 c.pct
+    const cs = countTasks([{ cards:[c] }]);
+    const cpct = cs.total ? Math.round(cs.done / cs.total * 100) : 0;
     const depsRow = c.be_deps ? (() => {
       const badges = c.be_deps.map(id => {
         const d = FE_DEP_MAP[id]; if(!d) return '';
@@ -720,7 +788,7 @@ function epicHTML(e) {
       <div class="fc-title">
         <span class="fc-id">${c.id}</span>
         ${c.name}
-        <span class="fc-pct">${c.pct}%</span>
+        <span class="fc-pct" title="自動計算：${cs.done}/${cs.total} (doing ${cs.doing}, todo ${cs.todo})">${cpct}% (${cs.done}/${cs.total})</span>
       </div>
       ${depsRow}
       <ul class="task-list">${rows}</ul>
