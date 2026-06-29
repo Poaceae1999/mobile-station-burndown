@@ -117,7 +117,7 @@ footer{text-align:center;padding:20px;color:#9CA3AF;font-size:11.5px;border-top:
 
 <div class="page-header">
   <h1>移動基地台儲能管理系統 — 專案追蹤看板</h1>
-  <p>資料來源：F01–F11, G01–G03, 材電0300-4 符合度分析, REF-權限定義, PROTOCOL-CONTEXT　｜　更新：2026-06-28　｜　今日 FE <strong>216 / 258 (84%)</strong>　·　BE <strong>41 / 43 (95%)</strong>　·　HEAD 94af535　·　剩餘 P0：§6.6.2 5 分鐘自動解鎖 / F03 雙級告警閃爍 / F04 G5 載入失敗 Modal / G02 緊急自動跳頁 + 聲音告警（service 雛形已建立未 wire-up）　·　歷史細節請展開下方 changelog 區塊</p>
+  <p>資料來源：F01–F11, G01–G03, 材電0300-4 符合度分析, REF-權限定義, PROTOCOL-CONTEXT　｜　更新：2026-06-28　｜　今日 FE <strong>218 / 258 (84%)</strong>　·　BE <strong>41 / 43 (95%)</strong>　·　本地 HEAD 94af535（落後 origin/dev 31 commits 自 06-19）·　origin/dev HEAD 337047b（2026-06-27）　·　⚠️ <strong>前 9 日 changelog「dev 0 commit」報告全錯</strong>（讀錯分支），實際 06-19→06-27 dev 大量提交，含 聲音告警（12fe0a2，已 wire-up）、Sidebar、Battery、PowerFlow、Curve menu 等大改　·　剩餘 P0：§6.6.2 5 分鐘自動解鎖 / F03 雙級告警閃爍 / F04 G5 載入失敗 Modal / G02 緊急自動跳頁（聲音告警已落地）　·　下次跑前請 git fetch + 以 origin/dev 為基準重審 31 commits</p>
   <button id="download-btn" onclick="downloadThisPage()" title="下載此頁面為 HTML 檔">⬇ 下載此頁面</button>
 </div>
 
@@ -148,18 +148,19 @@ function downloadThisPage(){
 <div class="changelog" id="changelog-today" style="border-color:#FCA5A5;background:#FEF2F2">
   <div class="changelog-hd" onclick="document.getElementById('changelog-today').classList.toggle('closed')">
     <div class="changelog-hd-dot" style="background:#DC2626"></div>
-    <div class="changelog-title" style="color:#991B1B">本次更新 — 2026-06-28（D29；週日；dev 0 新 commit — origin/dev HEAD 維持 afb3864；自 D23 06-22 12:24 後 dev 連續 6 日無新提交；FE/BE 持平以維持 X 軸對齊）</div>
+    <div class="changelog-title" style="color:#991B1B">本次更新 — 2026-06-28（D29；⚠️ <strong>關鍵修正</strong>：先前 9 日 changelog「dev 0 commit」報告全錯，實為讀錯分支 — 本地 HEAD 94af535 落後 origin/dev 31 commits 自 06-19；本次補認列「聲音告警」+2 task，下次跑必須以 origin/dev 為基準重審）</div>
     <div class="changelog-commits">
-      <span class="changelog-commit">— no commits —</span>
+      <span class="changelog-commit">+2 fe (audit)</span>
+      <span class="changelog-commit">12fe0a2</span>
     </div>
     <div class="changelog-arrow">▾</div>
   </div>
   <div class="changelog-body" style="border-top-color:#FCA5A5">
     <ul class="changelog-ul">
-      <li><span class="changelog-tag ct-confirm">節奏</span> <strong>D29（06-28，週日）— dev 0 新 commit 連續第 6 日</strong>：git log --since="2026-06-27" 範圍內 0 筆；HEAD 維持 94af535（feature/ui-feedback-changes 對 origin/dev 已 ff）。origin/dev HEAD 維持 afb3864（與 D24–D28 同），自 D23（06-22 12:24 xuan dafc84b PR21 整合 WIP merge）後 dev 連續 6 個日無新提交（含工作日 06-23/06-24/06-25/06-26 + 週末 06-27/06-28）。D24 提到的 feature 分支 2 commits（54dd37c 告警卡 6 等分 + 16097e1 站台資訊卡列高自適應）仍未 PR 進 dev；PR21 整合 WIP（codex/integrate-pr21-20260622 分支）亦仍待 review。</li>
-      <li><span class="changelog-tag ct-confirm">audit</span> <strong>既有 todo / doing 復驗未發現翻牌</strong>：今日 dev 無 commit、無檔案異動，F01–F11 / G01–G03 既有 task 狀態維持不變；§6.6.2 5 分鐘自動解鎖仍 todo（後端 authenticate_app_user 缺一條 (utc_now - locked_at).total_seconds() &lt; 300 檢查）；F03 雙級告警閃爍 / F04 G5 載入失敗警告 Modal / G02 緊急自動跳頁 + 聲音告警 P0 主項皆持平。FE_BE_DEPS / BE_FE_WAITING 條目狀態無變動。自動排程模式保守處理：無 commit 即無實作面變化，未做 8-agent 完整復驗，保守持平資料點（FE 216/258、BE 41/43）。</li>
-      <li><span class="changelog-tag ct-upd">資料</span> 燃盡圖 06-28：FE <strong>216 / 258</strong>（持平）／ BE <strong>41 / 43</strong>（持平）。FE 完成 <strong>84%</strong>／ BE 完成 <strong>95%</strong>。</li>
-      <li><span class="changelog-tag ct-confirm">節奏建議</span> <strong>D30（週一 06-29）優先項</strong>：(1) ⚠️ 連續 6 日 dev 無 commit（含工作日 06-23~06-26 共 4 個工作日）— <strong>強烈建議週一 06-29 stand-up 立即檢視團隊節奏</strong>：是否 PR 卡 review、是否需推動 feature 分支 merge、Chia He / xuan 兩位的本週進度與下週計畫；(2) feature/fix/alarm-card-six-fill + feature/fix/station-info-card-row-fill 兩支 UI 修正建議優先 PR 進 dev 收尾；(3) PR21 整合 WIP（codex/integrate-pr21-20260622 分支）建議優先完成 review 與 merge，避免 ui-flow-battery-integration 與 dev 分歧持續擴大；(4) 後端 §6.6.2 補一條時間判斷把鎖定改為 5 分鐘自動解（authenticate_app_user 增 (utc_now − locked_at).total_seconds() &lt; 300 檢查 + locked_at 過期自動清零）；(5) G02 緊急自動跳頁 + 聲音告警（最後一個 P0 sprint 後加場 task）；(6) D20 落地的 CHT xlsx 批匯腳本群可開始 dry-run 試跑驗證 schema 對應。</li>
+      <li><span class="changelog-tag ct-done">audit-翻牌</span> <strong>G02 聲音告警 todo→done</strong>（使用者指出「（聲音）告警相關應該有實作」後復驗發現）：origin/dev commit <strong>12fe0a2</strong>（2026-06-19 xuan「Update alarm UI and operations flow」）新增 <code>stationManager/Services/AlarmSoundService.cs</code> +266 行，採 <code>System.Media</code> + <code>System.Windows.Media.MediaPlayer</code> 雙 player：<em>_oneShotPlayer</em>（L1 新告警一次性播放，HashSet&lt;string&gt; _playedL1AlarmKeys 防重）+ <em>_continuousPlayer</em>（L2/L3 持續循環，DispatcherTimer 間隔 L3=850ms / L2=1500ms，<code>ResolveHighestContinuousLevel</code> 取目前最嚴重 active+未確認等級）。<code>MainWindow.xaml.cs:28</code> 持有 <code>_alarmSoundService</code>，alarm refresh 路徑呼叫 <code>UpdateAlarms(alarmItems)</code>（:751），lifecycle <code>Stop</code>/<code>Dispose</code> 完整接到 unload；<code>AppSettingsDialog.cs:78</code> 加入 <code>_alarmSoundEnabledCheckBox</code> 由使用者開關（<code>IsAlarmSoundEnabled()</code> 從 AppSetting 讀取）。同 commit 同步落地「確認聲音告警平台實作方式」（spec 開放問題 #3 解答：採 App 內嵌 MediaPlayer，非 Windows 系統聲）→ 兩個 G02 task 翻 done，FE 216→218。</li>
+      <li><span class="changelog-tag ct-fix">audit-缺失</span> <strong>⚠️ 嚴重 audit gap：本地 HEAD 94af535 落後 origin/dev 31 commits 自 06-19</strong>。`git log --since` 在本地 feature 分支執行回傳 0 筆，但 `git log origin/dev --since="2026-06-22"` 實際 31 筆（涵蓋 06-22→06-27），origin/dev HEAD 為 <strong>337047b</strong>（2026-06-27 xuan「Update alarm handling and WPF settings」）非先前報告的 afb3864。先前 D24–D28 共 5 日 changelog「dev 連續 N 日無新提交」全部不正確。已知 origin/dev 06-19→06-27 落地的大改至少包含：(a) <strong>聲音告警</strong> wire-up（12fe0a2，本次已認列）、(b) <strong>Sidebar</strong> 加寬 + 站台節點左移（c4d4f52 / ac4d433）、(c) <strong>Battery</strong> 模組平面化 / SOC-SOH 告警色 / 溫度卡兩欄 / 電池狀態頁卡片精修（多筆 feature/battery-* merge）、(d) <strong>PowerFlow</strong> 節點圓角陰影 / 旁路標籤置中 / 卡片位移微調（多筆 feature/flow-* merge）、(e) <strong>Curve menu</strong> 直流功率/充電功率指標補上 + 歷史查詢點碼 namespace 修正、(f) <strong>QuickAction</strong> 移除白底卡 + 按鈕加寬、(g) <strong>Alarm</strong> 已確認疊加改只查 ACKED 事件（2897dfb）+ 0/1 點位即時值驅動 + 字色統一系統綠（9dbe940）、(h) 站台資訊卡列高自適應 + 告警卡 6 等分填滿（已於 D24 listed 為「未 PR」實則已 merge）。<strong>本次跑保守只翻聲音告警 2 項；其餘 28+ commits 內含的 task 翻牌需在 D30 以 origin/dev 為基準重跑 8-agent 完整 audit。</strong></li>
+      <li><span class="changelog-tag ct-upd">資料</span> 燃盡圖 06-28：FE <strong>218 / 258</strong>（+2，G02 聲音告警 audit 補認列）／ BE <strong>41 / 43</strong>（持平，未審 origin/dev BE 變動）。FE 完成 <strong>85%</strong>／ BE 完成 <strong>95%</strong>。<strong>注意：實際完成度應更高</strong>（origin/dev 還有 ~28 commits 未審）。</li>
+      <li><span class="changelog-tag ct-confirm">節奏建議</span> <strong>D30（週一 06-29）優先項</strong>：(1) ⚠️ <strong>下次 burndown 跑前必須先 `git fetch && git checkout dev && git pull`</strong>，否則 audit gap 會持續累積；(2) 以 origin/dev HEAD 337047b 為基準執行 8-agent 完整 audit 重審 06-19→06-27 共 31 commits，預估還會有 10–30 項 todo→done 翻牌（依過去 audit 補認列經驗）；(3) 06-29 stand-up 確認團隊節奏（dev 實際在動，僅本地分支落後 — 不再是「dev 沉默」問題）；(4) PR21 整合 WIP（codex/integrate-pr21-20260622）確認是否已被 06-19 後活動取代或仍需 merge；(5) 後端 §6.6.2 5 分鐘自動解鎖仍 todo（authenticate_app_user 加時間檢查）；(6) G02 緊急告警自動跳頁仍 todo（目前需點擊 banner 才跳，無 auto-navigate）。</li>
     </ul>
   </div>
 </div>
@@ -258,7 +259,7 @@ const BURNDOWN = {
     ['2026-06-28', null], // 衝刺後加場 D29（06-28，週日，dev 0 新 commit — origin/dev HEAD 維持 afb3864；連續 6 日無新提交）：持平資料點以維持 X 軸對齊。
   ],
   // 累積完成 pts（與 fe[] 對齊）
-  fe_done_at:  [0,   4,   12,  20,  26,  42,  54,  63,  65,  73,  82,  86,  88,  88,  88,  91,  94,  98,  99,  105, 172, 172, 182, 194, 199, 201, 203, 203, 203, 204, 215, 215, 215, 216, 216, 216, 216, 216, 216, 216, 216, 216, 216],
+  fe_done_at:  [0,   4,   12,  20,  26,  42,  54,  63,  65,  73,  82,  86,  88,  88,  88,  91,  94,  98,  99,  105, 172, 172, 182, 194, 199, 201, 203, 203, 203, 204, 215, 215, 215, 216, 216, 216, 216, 216, 216, 216, 216, 216, 218],
   // 該日期當下 FE 總範圍（今日 = countTasks 實算，含 E8 UX）
   fe_total_at: [122, 122, 125, 128, 130, 137, 143, 146, 146, 149, 152, 152, 155, 155, 155, 157, 160, 162, 163, 165, 236, 236, 236, 248, 253, 253, 253, 253, 253, 253, 257, 257, 257, 258, 258, 258, 258, 258, 258, 258, 258, 258, 258],
 
@@ -463,7 +464,7 @@ const EPICS = [
       { s:'done', t:'頁面滾動條修復（StationOverviewPanel 滾動同步邏輯 + MainWindow ScrollViewer）', src:['F02','表五','StationOverviewPanel.xaml.cs:152'] },
     ]},
 
-    { id:'G02', name:'即時告警顯示', pct:35, be_deps:['alarm-bits'], tasks:[
+    { id:'G02', name:'即時告警顯示', pct:55, be_deps:['alarm-bits'], tasks:[
       { s:'done', t:'導覽按鈕 alarm 嚴重度同步閃爍（b3555f2 + 074cacd，QuickActionPanel.xaml +4 / xaml.cs +87 + MainWindow.xaml.cs +235）：QuickActionPanel 新增 SetInverterAlarm(string) / SetBatteryAlarm(string) — 任一所屬點位處於 L2/L3 時導覽按鈕以 Opacity 1.0→0.3、0.27s storyboard 閃爍，全部恢復 Normal 才停閃；MainWindow.HigherAlarmState(a,b) 取逆變器/電池所有點位中最嚴重等級套用至 QuickActionPanel；BatteryStatusPanel.ApplyAlarmStates(Dictionary<string,string>) 將 alarm map push 至模組 SOC/SOH/cell/detail rows。對應 §6.5 告警從「per-point 顯示」推進至「導覽列彙整指引」', sp:['§6.5'], src:['G02','F02','F04','QuickActionPanel.xaml.cs:74','MainWindow.xaml.cs:769','commit b3555f2','commit 074cacd'] },
       { s:'done', t:'通訊告警閃爍狀態機落地（3a6b1f6，ComponentStyles.xaml +52 + 5 個 VM IsCommError 屬性鏈）：Style.CommErrorTitleBorder + Style.CommErrorTitleText + Style.CommErrorCard — IsCommError=True 透過 DataTrigger 觸發 BeginStoryboard "SB_CommErrorFlash"（0.5s 雙色 DiscreteObjectKeyFrame 在 Brush.CommErrorBackground ↔ Brush.CommErrorFlash 之間切換），IsCommError=False 觸發 StopStoryboard 停閃恢復原色；IsPingLost 3pt 藍框疊層 + 黃色閃爍文字 overlay；對應 §6.5 從 doing 60% → doing 75%（緊急 vs 一般 雙級別與 ack-to-fix 仍缺）', sp:['§6.5'], src:['G02','F03','F04','ComponentStyles.xaml:15','commit 3a6b1f6'] },
       { s:'done', t:'紅色橫幅獨立常駐告警訊息區（GlobalAlarmButton 在 TopNavigationBar + AlertText/AlertTimeText）', sp:['§6.4.1(1)'], src:['G02','TopNavigationBar.xaml:14'] },
@@ -472,9 +473,9 @@ const EPICS = [
       { s:'todo',  p:'P0', t:'告警保持：告警消失但未確認前持續閃爍，確認後停閃恢復原色', sp:['§6.5.1(4)'], src:['G02'] },
       { s:'todo',  p:'P1', t:'緊急告警自動跳頁至告警所在頁面並標紅對應點位', sp:['§6.5.1(1)'], src:['G02','進度文檔P1'] },
       { s:'todo',  p:'P1', t:'F01 故障告警欄位加入閃爍 → 確認 → 固定紅行為', src:['G02','F01','進度文檔P1'] },
-      { s:'todo',  p:'P1', t:'聲音告警：緊急持續聲響 / 一般一次聲響 / 狀態改變短暫聲響', sp:['§6.5'], src:['G02','進度文檔P0'] },
+      { s:'done', t:'聲音告警：緊急持續聲響 / 一般一次聲響 / 狀態改變短暫聲響（origin/dev commit 12fe0a2，2026-06-19 xuan「Update alarm UI and operations flow」+266 行 AlarmSoundService.cs）：System.Media + WPF MediaPlayer 雙 player（_oneShotPlayer L1 新告警一次性 / _continuousPlayer L2/L3 持續循環 DispatcherTimer，L3 間隔 850ms、L2 間隔 1500ms）；HashSet&lt;string&gt; _playedL1AlarmKeys 防 L1 重播；ResolveHighestContinuousLevel 取目前最嚴重 active+未確認告警等級；MainWindow.xaml.cs:28 持有 _alarmSoundService，alarm refresh 路徑呼叫 UpdateAlarms(alarmItems)（line 751），lifecycle Stop/Dispose 完整；AppSettingsDialog.cs 提供 _alarmSoundEnabledCheckBox 使用者可開關（IsAlarmSoundEnabled() 由 AppSetting 讀取）', sp:['§6.5'], src:['G02','stationManager/Services/AlarmSoundService.cs','stationManager/MainWindow.xaml.cs:28,751','stationManager/Controls/AppSettingsDialog.cs:78','origin/dev commit 12fe0a2'] },
       { s:'done', t:'告警訊息區點擊導覽目的地確認：頂部紅色告警橫幅 MouseLeftButtonUp → ShowAlarmLogDashboard（即跳轉至 F06 AlarmLog，非告警站台頁）', src:['G02','MainWindow.xaml.cs:356','commit b72be06'] },
-      { s:'todo',  q:true, t:'確認聲音告警平台實作方式（Windows 系統聲 vs App 內嵌音效）', src:['G02'] },
+      { s:'done', t:'聲音告警平台實作方式確認：採 WPF System.Media + System.Windows.Media.MediaPlayer（App 內嵌音效，非 Windows 系統聲），可由 AppSettings 開關（commit 12fe0a2）', src:['G02','stationManager/Services/AlarmSoundService.cs:1-10'] },
     ]},
 
     { id:'G03', name:'頂部列', pct:88, be_deps:['auth'], tasks:[
